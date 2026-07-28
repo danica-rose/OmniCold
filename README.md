@@ -2,6 +2,29 @@
 
 IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smart contract holds USDC bonds deposited by logistics providers and automatically slashes them when an authorized IoT oracle reports a temperature threshold breach during cargo transit.
 
+---
+
+## Table of Contents
+
+- [Live Deployment](#live-deployment)
+- [Problem](#problem)
+- [Solution](#solution)
+- [Architecture](#architecture)
+- [Contract Entry Points](#contract-entry-points)
+- [Shipment Lifecycle](#shipment-lifecycle)
+- [Currency Support](#currency-support)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Features](#features)
+- [Testing](#testing)
+- [Level 1 Requirements](#level-1-requirements)
+- [Level 2 Requirements](#level-2-requirements)
+- [Submission Checklist](#submission-checklist)
+- [License](#license)
+
+---
+
 ## Live Deployment
 
 - **Contract ID**: `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW`
@@ -169,6 +192,112 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 - **Contract**: 5 unit tests + 7 property-based tests (Rust)
 - **Frontend**: 9 property-based tests (fast-check) + integration tests
+
+---
+
+## Level 1 Requirements
+
+> **White Belt** — Your project must include all items below to successfully complete Level 1.
+
+### 1. Wallet Setup
+
+- Set up the Freighter wallet
+- Use Stellar Testnet
+
+### 2. Wallet Connection
+
+- Implement wallet connect functionality
+- Implement wallet disconnect functionality
+
+### 3. Balance Handling
+
+- Fetch the connected wallet's XLM balance
+- Display the balance clearly in the UI
+
+### 4. Transaction Flow
+
+- Send an XLM transaction on the Stellar testnet
+- Show transaction feedback to the user:
+  - Success or failure state
+  - Transaction hash or confirmation message
+
+### 5. Development Standards
+
+Examples: UI setup, wallet integration, balance fetch, transaction logic, error handling
+
+### 💭 Level 1 Project Ideas
+
+Choose one of the following beginner-friendly ideas or propose your own (as long as all requirements are met):
+
+- **Simple Payment dApp** — Send XLM to any address with amount input
+- **Wallet Balance Checker** — Display balance for multiple accounts
+- **Transaction History Viewer** — Show recent transactions for the connected wallet
+- **Testnet Faucet Interface** — Request testnet XLM with one click
+- **Tip Jar Page** — Static donation page with QR code
+- **Split Bill Calculator** — Calculate split and send payment
+
+---
+
+## Level 2 Requirements
+
+> **Green Belt** — Building on your White Belt skills, you will now integrate multiple wallets, deploy your first smart contract, and implement real-time event handling.
+
+**Focus**: Multi-wallet integration, smart contract deployment, and real-time data synchronization
+
+**By completing this level, you will learn:**
+
+- StellarWalletsKit implementation
+- Error handling (wallet not found, rejected, insufficient balance)
+- Deploying a contract to the testnet
+- Calling contract functions from the frontend
+- Reading and writing data to a contract
+- Event listening and state synchronization
+- Transaction status tracking (pending/success/fail)
+
+> 💰 At the end of the monthly review period, selected winners will receive a prize based on the quality of their submission, and each winner will receive $10.
+
+### Requirements
+
+Your project must include all items below to successfully complete Level 2:
+
+- 3 error types handled
+- Contract deployed on testnet
+- Contract called from the frontend
+- Transaction status visible
+- Minimum 2+ meaningful commits
+
+**Deliverable**: Multi-wallet app with deployed contract and real-time event integration
+
+### 💭 Level 2 Project Ideas
+
+Choose one of these projects or propose your own (as long as it meets the requirements):
+
+- **Token Swap Interface** — Basic swap UI using Stellar DEX orderbook
+- **NFT Minter** — Mint simple NFT with metadata and live status
+- **Crowdfunding Page** — Collect donations with real-time progress
+- **Real-time Auction** — Live bidding with event updates
+- **Token Leaderboard** — Track and display token holders in real-time
+- **Activity Feed** — Stream contract events as notifications
+- **Live Poll** — One-question poll with real-time results
+- **Payment Tracker** — Multi-address payments with status updates
+
+---
+
+## Submission Checklist
+
+Ensure your project meets all requirements before submitting:
+
+- [ ] Public GitHub repository
+- [ ] README with setup instructions
+- [ ] Minimum 2+ meaningful commits
+- [ ] Live demo link (deployed on Vercel, Netlify, or similar) *(Optional)*
+- [ ] Screenshot: wallet options available
+- [ ] Deployed contract address
+- [ ] Transaction hash of a contract call (verifiable on Stellar Explorer)
+
+> Submit your GitHub repository link before the monthly deadline. You can submit anytime during the month. Earlier submissions will be reviewed first.
+
+---
 
 ## License
 
