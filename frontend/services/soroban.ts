@@ -253,7 +253,45 @@ export class SorobanService {
     // Simulate to get proper resource estimates
     const simulated = await this.server.simulateTransaction(tx);
     if (SorobanRpc.Api.isSimulationError(simulated)) {
-      throw new Error(`Simulation failed: ${simulated.error}`);
+      // Parse the simulation error into a user-friendly message
+      const rawError = simulated.error || '';
+      
+      // Check for common contract errors
+      if (rawError.includes('AlreadyInitialized') || rawError.includes('MissingValue')) {
+        throw new Error('This contract has already been initialized. You need to deploy a new contract instance for a new shipment.');
+      }
+      if (rawError.includes('NotLogisticsProvider')) {
+        throw new Error('Only the designated Logistics Provider can perform this action.');
+      }
+      if (rawError.includes('NotOracle')) {
+        throw new Error('Only the authorized Oracle can report temperatures.');
+      }
+      if (rawError.includes('NotShipper')) {
+        throw new Error('Only the Shipper can confirm delivery.');
+      }
+      if (rawError.includes('InvalidState')) {
+        throw new Error('This action is not available in the current shipment state.');
+      }
+      if (rawError.includes('InvalidTempRange')) {
+        throw new Error('Min temperature must be less than max temperature.');
+      }
+      if (rawError.includes('InvalidBondAmount')) {
+        throw new Error('Bond amount must be greater than zero.');
+      }
+      if (rawError.includes('DuplicateParticipant')) {
+        throw new Error('All participant addresses must be unique (shipper, provider, oracle).');
+      }
+      if (rawError.includes('TransferFailed')) {
+        throw new Error('USDC transfer failed — check balance and token allowance.');
+      }
+      
+      // Fallback: clean up the raw error for display
+      const cleanError = rawError
+        .replace(/\[Diagnostic Event\].*$/gs, '')
+        .replace(/HostError:.*?Error\(([^)]+)\)/i, 'Contract error: $1')
+        .trim();
+      
+      throw new Error(cleanError || 'Transaction simulation failed. The contract rejected this operation.');
     }
 
     const prepared = SorobanRpc.assembleTransaction(tx, simulated).build();

@@ -28,9 +28,10 @@ IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smar
 
 ## Live Deployment
 
-- **Contract ID**: `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW`
+- **Contract ID**: `CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN`
 - **Network**: Stellar Testnet
-- **Explorer**: [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW)
+- **Explorer**: [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN)
+- **Deploy TX**: [View on StellarExpert](https://stellar.expert/explorer/testnet/tx/ff3e1441634fca434b643833d9e4f6ef2057a9242c3c15bbf5e3a0f92c62606d)
 
 ## Problem
 
@@ -220,7 +221,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 | Requirement | Implementation |
 |-------------|---------------|
 | **3+ Error Types Handled** | 9 contract errors mapped in `lib/errors.ts` (already initialized, unauthorized oracle, invalid state, transfer failure, etc.). Frontend catches wallet-not-found, user-rejected, and insufficient-balance errors in `services/freighter.ts` |
-| **Contract Deployed on Testnet** | Deployed at `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW` — [view on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW) |
+| **Contract Deployed on Testnet** | Deployed at `CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN` — [view on StellarExpert](https://stellar.expert/explorer/testnet/contract/CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN) |
 | **Contract Called from Frontend** | `SorobanService` builds transaction XDR for `initialize_shipment`, `deposit_bond`, `report_temperature`, and `confirm_delivery`, signs via Freighter, submits to RPC |
 | **Transaction Status Visible** | `contractStore.isTransactionPending` tracks pending state. `pollTransactionStatus()` polls RPC up to 10 times (2s intervals) reporting pending → success/fail. Toast + TxHistory show final status |
 | **2+ Meaningful Commits** | ✅ Multiple feature commits across contract, frontend, and testing |
@@ -329,7 +330,7 @@ What makes OmniCold technically challenging:
 | 2+ meaningful commits | ✅ |
 | Live demo link | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
 | Screenshot: wallet options | *(see below)* |
-| Deployed contract address | `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW` |
+| Deployed contract address | `CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN` |
 | Transaction hash | *(add after first contract call on testnet)* |
 
 > Submit your GitHub repository link before the monthly deadline.

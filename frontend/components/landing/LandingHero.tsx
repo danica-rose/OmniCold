@@ -181,7 +181,7 @@ export function LandingHero() {
                 </button>
 
                 <a
-                  href="https://stellar.expert/explorer/testnet/contract/CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW"
+                  href="https://stellar.expert/explorer/testnet/contract/CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-4 rounded-xl border border-frost-cyan/30 text-frost-cyan text-lg font-medium
@@ -445,7 +445,7 @@ export function LandingHero() {
                 {/* External links column */}
                 <div className="flex flex-col gap-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-frost-gray">Explore</h4>
-                  <a href="https://stellar.expert/explorer/testnet/contract/CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW" target="_blank" rel="noopener noreferrer" className="text-sm text-frost-gray hover:text-frost-cyan transition-colors">
+                  <a href="https://stellar.expert/explorer/testnet/contract/CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN" target="_blank" rel="noopener noreferrer" className="text-sm text-frost-gray hover:text-frost-cyan transition-colors">
                     Contract on StellarExpert
                   </a>
                   <a href="https://soroban.stellar.org/" target="_blank" rel="noopener noreferrer" className="text-sm text-frost-gray hover:text-frost-cyan transition-colors">
