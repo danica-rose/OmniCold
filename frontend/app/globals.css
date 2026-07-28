@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-arctic-navy text-frost-white;
+  }
+}
+
+@layer utilities {
+  .frost-glass {
+    @apply backdrop-blur-md bg-arctic-slate/80 border border-frost-cyan/20;
+  }
+  
+  .frost-glow {
+    @apply shadow-[0_0_20px_rgba(0,212,255,0.12)];
+  }
+  
+  .frost-glow-hover {
+    @apply hover:shadow-[0_0_30px_rgba(0,212,255,0.15)];
+  }
+
+  /* Visually hidden utility for screen readers */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
