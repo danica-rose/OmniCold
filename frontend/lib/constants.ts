@@ -2,7 +2,7 @@ export const NETWORK_CONFIG = {
   testnet: {
     rpcUrl: 'https://soroban-testnet.stellar.org',
     passphrase: 'Test SDF Network ; September 2015',
-    contractId: process.env.NEXT_PUBLIC_TESTNET_CONTRACT_ID || 'CBOROBVU4NXZOMFQUQSOOHD4JW6DTU4OPRV6AZYKHZJC3OCKU4KS7ZCN',
+    contractId: process.env.NEXT_PUBLIC_TESTNET_CONTRACT_ID || 'CDA6IANPMDNLW5SDNMH2WWXTLLIGNMIBR3RDURSCCRALHV6OFDP5YEFO',
     explorerUrl: 'https://stellar.expert/explorer/testnet',
     horizonUrl: 'https://horizon-testnet.stellar.org',
   },
