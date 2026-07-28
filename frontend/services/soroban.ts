@@ -243,11 +243,11 @@ export class SorobanService {
   private async buildTransaction(sourceAddress: string, operation: xdr.Operation): Promise<string> {
     const account = await this.server.getAccount(sourceAddress);
     const tx = new TransactionBuilder(account, {
-      fee: '100',
+      fee: '10000000',
       networkPassphrase: this.networkPassphrase,
     })
       .addOperation(operation)
-      .setTimeout(30)
+      .setTimeout(300)
       .build();
 
     // Simulate to get proper resource estimates
@@ -300,9 +300,9 @@ export class SorobanService {
 
   /** Internal: poll for transaction completion */
   private async pollTransactionStatus(hash: string): Promise<TransactionResult> {
-    const maxAttempts = 10;
+    const maxAttempts = 30;
     for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       try {
         const result = await this.server.getTransaction(hash);
         if (result.status === 'SUCCESS') {
@@ -316,7 +316,7 @@ export class SorobanService {
         // Continue polling
       }
     }
-    return { success: false, txHash: hash, error: 'Transaction confirmation timeout' };
+    return { success: false, txHash: hash, error: 'Transaction confirmation timeout — check Stellar Explorer to verify status' };
   }
 }
 

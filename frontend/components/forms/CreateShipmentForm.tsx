@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { InitializeShipmentParams } from '@/lib/types';
 import { LoadingButton, showToast } from '@/components/shared';
 import { frostThaw } from '@/lib/animations';
 import { motion } from 'framer-motion';
+import { fetchPrices, type PriceData } from '@/services/prices';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -159,8 +160,24 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [prices, setPrices] = useState<PriceData | null>(null);
 
   const disabled = isSubmitting;
+
+  // Fetch prices on mount for live conversion
+  useEffect(() => {
+    fetchPrices().then(setPrices).catch(() => {});
+  }, []);
+
+  // Compute bond conversion preview
+  const bondPreview = (() => {
+    if (!bondAmount || !prices) return null;
+    const stroops = parseInt(bondAmount, 10);
+    if (isNaN(stroops) || stroops <= 0) return null;
+    const usdcValue = stroops / 10_000_000;
+    const xlmValue = usdcValue / prices.xlmUsd;
+    return { usdc: usdcValue.toFixed(2), xlm: xlmValue.toFixed(2) };
+  })();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -284,7 +301,21 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
         error={errors.bondAmount}
         placeholder="e.g. 1000000000"
         disabled={disabled}
+        helperText="1 USDC = 10,000,000 stroops"
       />
+
+      {/* Bond conversion preview */}
+      {bondPreview && (
+        <div className="flex items-center gap-3 -mt-2 px-1">
+          <span className="text-xs text-frost-cyan font-mono font-semibold">
+            = {bondPreview.usdc} USDC
+          </span>
+          <span className="text-xs text-frost-gray/40">≈</span>
+          <span className="text-xs text-frost-gray font-mono">
+            {bondPreview.xlm} XLM
+          </span>
+        </div>
+      )}
 
       {/* Submit */}
       <LoadingButton
