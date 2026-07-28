@@ -13,9 +13,15 @@ export function NavHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-arctic-deep border-b border-frost-cyan/10">
+    <header className="sticky top-0 z-40 w-full bg-arctic-deep/90 backdrop-blur-xl border-b border-frost-cyan/10">
       {/* Subtle frost texture overlay */}
       <div className="absolute inset-0 bg-frost-gradient pointer-events-none" aria-hidden="true" />
+      {/* Bottom glow line */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.15), transparent)' }}
+        aria-hidden="true"
+      />
 
       <div className="relative flex items-center justify-between px-4 h-16 md:px-6">
         {/* Brand */}

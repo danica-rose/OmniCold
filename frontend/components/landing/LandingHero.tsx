@@ -160,11 +160,11 @@ export function LandingHero() {
                   className={[
                     'px-8 py-4 rounded-xl font-semibold text-arctic-navy text-lg',
                     'min-h-[52px] min-w-[220px]',
-                    'transition-all duration-200',
+                    'transition-all duration-300',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-frost-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-arctic-navy',
                     isConnecting
                       ? 'bg-frost-cyan/60 cursor-wait'
-                      : 'bg-frost-cyan hover:bg-frost-cyan/90 hover:shadow-frost-hover active:scale-95 cursor-pointer',
+                      : 'bg-frost-cyan hover:bg-frost-cyan/90 hover:shadow-neon hover:-translate-y-0.5 active:scale-95 cursor-pointer',
                   ].join(' ')}
                 >
                   {isConnecting ? (
@@ -185,7 +185,7 @@ export function LandingHero() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-6 py-4 rounded-xl border border-frost-cyan/30 text-frost-cyan text-lg font-medium
-                             hover:bg-frost-cyan/5 hover:border-frost-cyan/60 transition-all duration-200"
+                             hover:bg-frost-cyan/5 hover:border-frost-cyan/60 hover:shadow-[0_0_20px_rgba(0,212,255,0.12)] transition-all duration-300"
                 >
                   View Contract →
                 </a>
@@ -204,15 +204,24 @@ export function LandingHero() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.8 + idx * 0.15 }}
+                      className="frost-stat-card !p-4 !rounded-lg"
                     >
-                      <p className="text-2xl font-bold text-frost-white">{stat.value}</p>
-                      <p className="text-xs text-frost-gray">{stat.label}</p>
+                      <p className="text-2xl font-bold text-frost-gradient">{stat.value}</p>
+                      <p className="text-xs text-frost-gray mt-1">{stat.label}</p>
                     </motion.div>
                   </React.Fragment>
                 ))}
               </div>
             </motion.div>
           </section>
+
+          {/* ═══════════════ SECTION DIVIDER ═══════════════ */}
+          <div className="relative z-10 flex justify-center py-2" aria-hidden="true">
+            <div
+              className="w-48 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent)' }}
+            />
+          </div>
 
           {/* ═══════════════ FEATURES SECTION ═══════════════ */}
           <section id="features" className="relative z-10 px-6 py-24">
@@ -257,7 +266,8 @@ export function LandingHero() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: idx * 0.15 }}
-                    className="rounded-xl border border-frost-cyan/15 bg-arctic-slate/40 backdrop-blur-sm p-6 flex flex-col gap-4"
+                    className="rounded-xl border border-frost-cyan/15 bg-arctic-slate/40 backdrop-blur-sm p-6 flex flex-col gap-4
+                               hover:border-frost-cyan/30 hover:shadow-[0_0_30px_rgba(0,212,255,0.1)] transition-all duration-300"
                   >
                     <div className="bg-frost-cyan/10 rounded-full p-3 w-fit">
                       {feature.icon}

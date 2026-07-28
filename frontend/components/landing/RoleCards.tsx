@@ -42,14 +42,14 @@ export function RoleCards() {
       {ROLES.map((role) => (
         <FrostCard
           key={role.title}
-          className="p-6 flex flex-col items-center text-center gap-4"
+          className="p-6 flex flex-col items-center text-center gap-4 group"
         >
           <div
             role="listitem"
             className="flex flex-col items-center gap-4 w-full"
           >
             {/* Role icon with circular background */}
-            <div className="bg-frost-cyan/10 rounded-full p-4" aria-hidden="true">
+            <div className="bg-frost-cyan/10 rounded-full p-4 transition-all duration-300 group-hover:bg-frost-cyan/20 group-hover:shadow-[0_0_20px_rgba(0,212,255,0.15)]" aria-hidden="true">
               <role.Icon className="w-10 h-10 text-frost-cyan" />
             </div>
 

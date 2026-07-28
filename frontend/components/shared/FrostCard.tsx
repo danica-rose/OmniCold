@@ -39,14 +39,23 @@ export function FrostCard({ children, variant = 'default', className = '', layou
       className={[
         'relative rounded-xl border backdrop-blur-md',
         'bg-arctic-slate/80 bg-frost-gradient',
-        'shadow-frost-glow transition-shadow duration-300',
+        'shadow-frost-glow transition-all duration-300',
         variantBorderColors[variant],
         variantHoverShadows[variant],
         className,
       ].join(' ')}
-      whileHover={{ scale: 1.005 }}
+      style={{
+        boxShadow: 'inset 0 1px 0 rgba(0, 212, 255, 0.06), 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 212, 255, 0.08)',
+      }}
+      whileHover={{ scale: 1.005, y: -2 }}
       transition={{ duration: 0.2 }}
     >
+      {/* Top highlight line */}
+      <div
+        className="absolute top-0 left-4 right-4 h-px rounded-full"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent)' }}
+        aria-hidden="true"
+      />
       {children}
     </motion.div>
   );

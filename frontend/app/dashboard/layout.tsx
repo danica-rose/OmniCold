@@ -21,8 +21,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-arctic-navy flex flex-col">
+      {/* Subtle mesh gradient background */}
+      <div className="fixed inset-0 mesh-bg pointer-events-none" aria-hidden="true" />
+      {/* Noise texture for depth */}
+      <div className="fixed inset-0 noise-overlay" aria-hidden="true" />
+      
       <NavHeader />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:px-6 lg:px-8">
+      <main className="relative flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:px-6 lg:px-8">
         {children}
       </main>
     </div>

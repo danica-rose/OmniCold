@@ -20,6 +20,7 @@ IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smar
 - [Testing](#testing)
 - [Level 1 Compliance](#level-1-compliance)
 - [Level 2 Compliance](#level-2-compliance)
+- [Idea Submission](#idea-submission)
 - [Submission Checklist](#submission-checklist)
 - [License](#license)
 
@@ -224,6 +225,98 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 | **Transaction Status Visible** | `contractStore.isTransactionPending` tracks pending state. `pollTransactionStatus()` polls RPC up to 10 times (2s intervals) reporting pending → success/fail. Toast + TxHistory show final status |
 | **2+ Meaningful Commits** | ✅ Multiple feature commits across contract, frontend, and testing |
 | **Real-time Event Integration** | `services/polling.ts` polls contract state on interval. State changes trigger UI re-renders via Zustand subscriptions |
+
+---
+
+## Idea Submission
+
+### 1. Problem Statement
+
+Cold-chain logistics for pharmaceuticals and biologics lacks trustless, automated penalty enforcement when temperature thresholds are breached during transit. The current dispute resolution process relies on manual claims, delayed arbitration, and opaque sensor data stored in centralized databases controlled by the logistics provider.
+
+This creates three critical failures:
+- **Delayed compensation** — shippers wait weeks or months for claims to resolve
+- **Disputed sensor readings** — no immutable audit trail means providers can contest data
+- **No immediate financial consequence** — providers face zero automated penalty for violating temperature SLAs
+
+The pharmaceutical industry loses over $35 billion annually to cold-chain failures, yet the enforcement mechanism remains manual and trust-dependent.
+
+### 2. Why Stellar?
+
+Stellar is uniquely suited for this use case:
+
+- **Native USDC**: Circle-issued USDC on Stellar via the Stellar Asset Contract (SAC). Bonds are real dollars, not volatile tokens. Cold-chain logistics operates in fiat — USDC bridges that gap without conversion friction.
+- **5-second finality**: When a temperature breach occurs, the bond slash executes in the same block (~5s). No waiting for confirmations. Breach → penalty is near-instant.
+- **Sub-cent fees**: IoT oracles report temperatures frequently. At ~$0.0001/tx, monitoring a 48-hour shipment every 15 minutes costs less than $0.02 total. On Ethereum this would cost hundreds in gas.
+- **Soroban smart contracts**: Rust-based, WASM-compiled contracts provide the conditional logic for escrow, threshold evaluation, and atomic token transfers.
+- **Enterprise credibility**: Stellar is used by MoneyGram, Circle, and Wise for real-money movement. Pharmaceutical companies need institutional-grade infrastructure, not DeFi-focused chains.
+
+### 3. Target Users
+
+| User | Role | Incentive |
+|------|------|-----------|
+| **Pharmaceutical Distributors** | Shipper — creates shipments, defines temp thresholds | Guaranteed instant compensation on breach without filing claims |
+| **Cold-Chain Logistics Providers** | Provider — deposits USDC bond as SLA guarantee | Competitive differentiation: posting a bond signals confidence in cold-chain capability |
+| **IoT Oracle Operators** | Oracle — authorized address reporting temperatures on-chain | Recurring revenue from oracle services; reputation tied to reporting accuracy |
+| **Cargo Insurers** | Observer — monitors on-chain data | Transparent penalty enforcement reduces dispute volume and claims processing costs |
+
+### 4. Technical Architecture
+
+**Frontend**: Next.js 16 + TypeScript + Tailwind CSS, deployed on Vercel (serverless). Wallet via Freighter, state via Zustand, contract interaction via `@stellar/stellar-sdk` v12.
+
+**Smart Contract**: Rust + `soroban-sdk` 22.0.0, compiled to WASM. Four entry points: `initialize_shipment`, `deposit_bond`, `report_temperature`, `confirm_delivery`. All state in Soroban persistent storage with TTL bumping.
+
+**Data Flow**:
+
+```
+IoT Sensor → Oracle Wallet → report_temperature() → Contract evaluates threshold
+                                                          │
+                                              [In range]  → State stays Active
+                                              [Out of range] → Atomic slash:
+                                                   USDC from contract → Shipper
+                                                   State → Breached (irreversible)
+```
+
+No backend, no database. The blockchain is the single source of truth. Frontend reads state via Soroban RPC, mutations happen through signed transactions.
+
+### 5. Complexity Evaluation
+
+What makes OmniCold technically challenging:
+
+1. **Atomic multi-party token transfers** — The contract must atomically move USDC between three parties (provider → escrow → shipper) with proper authorization. Failed mid-execution transfers could lock funds permanently.
+
+2. **Irreversible state machine** — Shipment lifecycle (Created → Active → Delivered/Breached) enforced on-chain with no rollback. Access control must prevent race conditions between oracle breach reports and shipper delivery confirmations.
+
+3. **IoT-to-blockchain oracle problem** — Real-world sensor data must be trustworthy on-chain. The system relies on a single authorized oracle address, requiring careful threat modeling around oracle compromise and downtime.
+
+4. **Soroban TTL management** — Persistent storage entries expire if TTL is not bumped. The contract must extend TTL on all 8 storage keys during every interaction to prevent data loss mid-shipment.
+
+5. **i128 arithmetic in WASM** — USDC bond amounts use 128-bit integers. Overflow-safe arithmetic on WASM targets requires different patterns than standard Rust.
+
+6. **XDR type marshalling** — Frontend must serialize/deserialize between TypeScript and Soroban's XDR encoding (enum variants as ScvVec, addresses as ScAddress, i128 as split hi/lo).
+
+### 6. Roadmap
+
+**MVP (Current — Testnet)**:
+- ✅ Single-shipment escrow contract deployed on Stellar Testnet
+- ✅ Full lifecycle: create → deposit → monitor → deliver/breach
+- ✅ Freighter wallet with connect/disconnect and XLM balance
+- ✅ Role-based dashboard (Shipper, Provider, Oracle)
+- ✅ Temperature gauge, shipment pipeline, transaction history
+- ✅ 12 passing tests (5 unit + 7 property-based)
+- ✅ Deployed on Vercel
+
+**User Acquisition**:
+- Open-source on GitHub, publish on Stellar Developer Discord
+- Pilot with a small pharmaceutical distributor and regional cold-chain carrier
+- Partner with IoT sensor manufacturers (Sensitech, Testo) for standardized oracle reporting
+
+**Mainnet Vision**:
+- Multi-shipment factory contract for concurrent shipments
+- Multi-oracle consensus (2-of-3 agreement before triggering breach)
+- Graduated penalty tiers (proportional to breach severity/duration)
+- Cross-border settlement via Stellar anchor network
+- Mobile oracle app connecting Bluetooth sensors directly to on-chain reporting
 
 ---
 
