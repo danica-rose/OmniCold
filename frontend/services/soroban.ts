@@ -33,11 +33,124 @@ export class SorobanService {
   /** Read all contract storage keys and return typed ContractState */
   async getContractState(): Promise<ContractState | null> {
     try {
-      const contract = new Contract(this.contractId);
-      // This is a simplified implementation - in production, you'd use getLedgerEntries
-      // to read specific storage keys from the contract
-      // For now, return null to indicate no state (contract not yet initialized or not found)
-      return null;
+      if (!this.contractId) return null;
+
+      const contractAddress = new Address(this.contractId);
+
+      // The contract uses enum StorageKey variants as keys in persistent storage.
+      // Soroban serializes enum variants as ScvVec([ScvSymbol(variant_name)]) for
+      // unit variants (no associated data).
+      const makeEnumKey = (variantName: string): xdr.ScVal => {
+        return xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(variantName)]);
+      };
+
+      // Build ledger keys for each storage entry
+      const keyNames = [
+        'ShipmentState',
+        'MinTemp',
+        'MaxTemp',
+        'Shipper',
+        'LogisticsProvider',
+        'Oracle',
+        'BondAmount',
+        'UsdcToken',
+      ];
+
+      const ledgerKeys = keyNames.map((name) =>
+        xdr.LedgerKey.contractData(
+          new xdr.LedgerKeyContractData({
+            contract: contractAddress.toScAddress(),
+            key: makeEnumKey(name),
+            durability: xdr.ContractDataDurability.persistent(),
+          })
+        )
+      );
+
+      const response = await this.server.getLedgerEntries(...ledgerKeys);
+
+      if (!response.entries || response.entries.length === 0) {
+        return null; // Contract not initialized yet
+      }
+
+      // Parse each entry
+      let shipmentStatus: ContractState['shipmentStatus'] = 'Created';
+      let minTemp = 0;
+      let maxTemp = 0;
+      let shipper = '';
+      let logisticsProvider = '';
+      let oracle = '';
+      let bondAmount = 0n;
+      let usdcToken = '';
+
+      for (const entry of response.entries) {
+        const dataEntry = entry.val.contractData();
+        const key = dataEntry.key();
+        const val = dataEntry.val();
+
+        // Extract the enum variant name from ScvVec([ScvSymbol(name)])
+        if (key.switch().name === 'scvVec') {
+          const vec = key.vec();
+          if (vec && vec.length > 0 && vec[0].switch().name === 'scvSymbol') {
+            const variantName = vec[0].sym().toString();
+
+            switch (variantName) {
+              case 'ShipmentState': {
+                // ShipmentStatus is also an enum: ScvVec([ScvSymbol(variant)])
+                if (val.switch().name === 'scvVec') {
+                  const statusVec = val.vec();
+                  if (statusVec && statusVec.length > 0) {
+                    const statusName = statusVec[0].sym().toString();
+                    const statusMap: Record<string, ContractState['shipmentStatus']> = {
+                      Created: 'Created',
+                      Active: 'Active',
+                      Delivered: 'Delivered',
+                      Breached: 'Breached',
+                    };
+                    shipmentStatus = statusMap[statusName] ?? 'Created';
+                  }
+                }
+                break;
+              }
+              case 'MinTemp':
+                minTemp = val.i32();
+                break;
+              case 'MaxTemp':
+                maxTemp = val.i32();
+                break;
+              case 'Shipper':
+                shipper = Address.fromScVal(val).toString();
+                break;
+              case 'LogisticsProvider':
+                logisticsProvider = Address.fromScVal(val).toString();
+                break;
+              case 'Oracle':
+                oracle = Address.fromScVal(val).toString();
+                break;
+              case 'BondAmount': {
+                const i128 = val.i128();
+                const lo = BigInt('0x' + i128.lo().toXDR('hex'));
+                const hi = BigInt('0x' + i128.hi().toXDR('hex'));
+                bondAmount = (hi << 64n) | lo;
+                break;
+              }
+              case 'UsdcToken':
+                usdcToken = Address.fromScVal(val).toString();
+                break;
+            }
+          }
+        }
+      }
+
+      return {
+        shipmentStatus,
+        minTemp,
+        maxTemp,
+        shipper,
+        logisticsProvider,
+        oracle,
+        bondAmount,
+        usdcToken,
+      };
     } catch (error) {
       console.error('Failed to fetch contract state:', error);
       return null;
