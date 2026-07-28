@@ -18,8 +18,8 @@ IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smar
 - [Quick Start](#quick-start)
 - [Features](#features)
 - [Testing](#testing)
-- [Level 1 Requirements](#level-1-requirements)
-- [Level 2 Requirements](#level-2-requirements)
+- [Level 1 Compliance](#level-1-compliance)
+- [Level 2 Compliance](#level-2-compliance)
 - [Submission Checklist](#submission-checklist)
 - [License](#license)
 
@@ -195,107 +195,51 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ---
 
-## Level 1 Requirements
+## Level 1 Compliance
 
-> **White Belt** — Your project must include all items below to successfully complete Level 1.
+> How OmniCold fulfills each White Belt requirement.
 
-### 1. Wallet Setup
-
-- Set up the Freighter wallet
-- Use Stellar Testnet
-
-### 2. Wallet Connection
-
-- Implement wallet connect functionality
-- Implement wallet disconnect functionality
-
-### 3. Balance Handling
-
-- Fetch the connected wallet's XLM balance
-- Display the balance clearly in the UI
-
-### 4. Transaction Flow
-
-- Send an XLM transaction on the Stellar testnet
-- Show transaction feedback to the user:
-  - Success or failure state
-  - Transaction hash or confirmation message
-
-### 5. Development Standards
-
-Examples: UI setup, wallet integration, balance fetch, transaction logic, error handling
-
-### 💭 Level 1 Project Ideas
-
-Choose one of the following beginner-friendly ideas or propose your own (as long as all requirements are met):
-
-- **Simple Payment dApp** — Send XLM to any address with amount input
-- **Wallet Balance Checker** — Display balance for multiple accounts
-- **Transaction History Viewer** — Show recent transactions for the connected wallet
-- **Testnet Faucet Interface** — Request testnet XLM with one click
-- **Tip Jar Page** — Static donation page with QR code
-- **Split Bill Calculator** — Calculate split and send payment
+| Requirement | Implementation |
+|-------------|---------------|
+| **Wallet Setup** — Freighter + Testnet | Freighter API integrated via `@stellar/freighter-api`. Network hardcoded to Stellar Testnet in `stores/walletStore.ts` |
+| **Wallet Connect** | `connect()` in walletStore calls `freighter.requestAccess()` and stores the public key. WalletButton in NavHeader triggers it |
+| **Wallet Disconnect** | `disconnect()` clears address, balance, and connection state. Accessible from the wallet dropdown |
+| **Fetch XLM Balance** | `fetchBalance()` queries the Horizon `/accounts/{address}` endpoint and extracts the native balance |
+| **Display Balance in UI** | XLM balance shown in the NavHeader wallet dropdown with live USD/PHP conversion via CoinGecko |
+| **Send Transaction on Testnet** | `SorobanService.submitTransaction()` sends signed XDR to Soroban RPC. Used for bond deposits, breach reports, and delivery confirmation |
+| **Transaction Feedback** | Toast notifications show success/failure. Transaction hash displayed in the TxHistory component and linkable to Stellar Explorer |
+| **Development Standards** | TypeScript strict mode, component-based architecture, Zustand state management, Vitest + fast-check testing, Tailwind CSS styling |
 
 ---
 
-## Level 2 Requirements
+## Level 2 Compliance
 
-> **Green Belt** — Building on your White Belt skills, you will now integrate multiple wallets, deploy your first smart contract, and implement real-time event handling.
+> How OmniCold fulfills each Green Belt requirement.
 
-**Focus**: Multi-wallet integration, smart contract deployment, and real-time data synchronization
-
-**By completing this level, you will learn:**
-
-- StellarWalletsKit implementation
-- Error handling (wallet not found, rejected, insufficient balance)
-- Deploying a contract to the testnet
-- Calling contract functions from the frontend
-- Reading and writing data to a contract
-- Event listening and state synchronization
-- Transaction status tracking (pending/success/fail)
-
-> 💰 At the end of the monthly review period, selected winners will receive a prize based on the quality of their submission, and each winner will receive $10.
-
-### Requirements
-
-Your project must include all items below to successfully complete Level 2:
-
-- 3 error types handled
-- Contract deployed on testnet
-- Contract called from the frontend
-- Transaction status visible
-- Minimum 2+ meaningful commits
-
-**Deliverable**: Multi-wallet app with deployed contract and real-time event integration
-
-### 💭 Level 2 Project Ideas
-
-Choose one of these projects or propose your own (as long as it meets the requirements):
-
-- **Token Swap Interface** — Basic swap UI using Stellar DEX orderbook
-- **NFT Minter** — Mint simple NFT with metadata and live status
-- **Crowdfunding Page** — Collect donations with real-time progress
-- **Real-time Auction** — Live bidding with event updates
-- **Token Leaderboard** — Track and display token holders in real-time
-- **Activity Feed** — Stream contract events as notifications
-- **Live Poll** — One-question poll with real-time results
-- **Payment Tracker** — Multi-address payments with status updates
+| Requirement | Implementation |
+|-------------|---------------|
+| **3+ Error Types Handled** | 9 contract errors mapped in `lib/errors.ts` (already initialized, unauthorized oracle, invalid state, transfer failure, etc.). Frontend catches wallet-not-found, user-rejected, and insufficient-balance errors in `services/freighter.ts` |
+| **Contract Deployed on Testnet** | Deployed at `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW` — [view on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW) |
+| **Contract Called from Frontend** | `SorobanService` builds transaction XDR for `initialize_shipment`, `deposit_bond`, `report_temperature`, and `confirm_delivery`, signs via Freighter, submits to RPC |
+| **Transaction Status Visible** | `contractStore.isTransactionPending` tracks pending state. `pollTransactionStatus()` polls RPC up to 10 times (2s intervals) reporting pending → success/fail. Toast + TxHistory show final status |
+| **2+ Meaningful Commits** | ✅ Multiple feature commits across contract, frontend, and testing |
+| **Real-time Event Integration** | `services/polling.ts` polls contract state on interval. State changes trigger UI re-renders via Zustand subscriptions |
 
 ---
 
 ## Submission Checklist
 
-Ensure your project meets all requirements before submitting:
+| Item | Status |
+|------|--------|
+| Public GitHub repository | ✅ |
+| README with setup instructions | ✅ (see [Quick Start](#quick-start)) |
+| 2+ meaningful commits | ✅ |
+| Live demo link | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
+| Screenshot: wallet options | *(see below)* |
+| Deployed contract address | `CCM2F2EHUAYPDW4FB2OUZOVD3ZOHPBFT5CTZ73GFA6OZCWDED6SFVRMW` |
+| Transaction hash | *(add after first contract call on testnet)* |
 
-- [ ] Public GitHub repository
-- [ ] README with setup instructions
-- [ ] Minimum 2+ meaningful commits
-- [ ] Live demo link (deployed on Vercel, Netlify, or similar) *(Optional)*
-- [ ] Screenshot: wallet options available
-- [ ] Deployed contract address
-- [ ] Transaction hash of a contract call (verifiable on Stellar Explorer)
-
-> Submit your GitHub repository link before the monthly deadline. You can submit anytime during the month. Earlier submissions will be reviewed first.
+> Submit your GitHub repository link before the monthly deadline.
 
 ---
 
