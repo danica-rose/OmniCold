@@ -83,7 +83,10 @@ export default function ShipperView() {
 
   async function handleInitializeShipment(params: InitializeShipmentParams) {
     showToast('success', 'Transaction signed! Submitting to Stellar testnet...');
-    await submitTransaction('initialize_shipment', params);
+    const txHash = await submitTransaction('initialize_shipment', params);
+    if (txHash) {
+      showToast('success', `Shipment created! TX: ${txHash.slice(0, 8)}…`);
+    }
     await fetchContractState();
   }
 

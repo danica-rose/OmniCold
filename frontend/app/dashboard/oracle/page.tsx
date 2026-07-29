@@ -138,7 +138,21 @@ export default function OracleView() {
         <AuthBadge isAuthorized={isAuthorized} />
       </div>
 
-      {/* ── Temperature Gauge + Thresholds ───────────────────────────── */}
+      {/* ── Wallet mismatch warning ──────────────────────────────────── */}
+      {!isAuthorized && state.oracle && (
+        <div className="flex items-start gap-3 rounded-xl border border-status-warning/40 bg-status-warning/5 px-5 py-4" role="alert">
+          <span className="text-lg" aria-hidden="true">⚠️</span>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-status-warning">Wrong wallet connected</p>
+            <p className="text-xs text-frost-gray">
+              Switch to the Oracle wallet in Freighter to report temperatures.
+            </p>
+            <p className="text-xs text-frost-gray/70 font-mono mt-1">
+              Expected: {state.oracle.slice(0, 8)}…{state.oracle.slice(-4)}
+            </p>
+          </div>
+        </div>
+      )}      {/* ── Temperature Gauge + Thresholds ───────────────────────────── */}
       <FrostCard className="p-5 flex flex-col items-center gap-4">
         <TemperatureGauge
           currentTemp={500}

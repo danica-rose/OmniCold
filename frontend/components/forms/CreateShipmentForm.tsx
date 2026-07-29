@@ -117,8 +117,8 @@ function validateForm(
   }
 
   const bond = parseFloat(bondAmount);
-  if (bondAmount === '' || isNaN(bond) || bond <= 0 || !Number.isInteger(bond)) {
-    errors.bondAmount = 'Bond amount must be positive';
+  if (bondAmount === '' || isNaN(bond) || bond <= 0) {
+    errors.bondAmount = 'Bond amount must be greater than 0';
   }
 
   if (!logisticsProvider.trim()) {
@@ -150,12 +150,15 @@ function validateForm(
  * Shows a LoadingButton spinner while the TX is pending.
  * Errors are surfaced as inline field messages; contract errors go to toast.
  */
+// Default USDC token address for demo mode (testnet)
+const DEFAULT_USDC_TOKEN = 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA';
+
 export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmentFormProps) {
   const [minTemp, setMinTemp] = useState('');
   const [maxTemp, setMaxTemp] = useState('');
   const [logisticsProvider, setLogisticsProvider] = useState('');
   const [oracle, setOracle] = useState('');
-  const [usdcToken, setUsdcToken] = useState('');
+  const [usdcToken, setUsdcToken] = useState(DEFAULT_USDC_TOKEN);
   const [bondAmount, setBondAmount] = useState('');
 
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -169,14 +172,14 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
     fetchPrices().then(setPrices).catch(() => {});
   }, []);
 
-  // Compute bond conversion preview
+  // Compute bond conversion preview (input is now in USDC, not stroops)
   const bondPreview = (() => {
     if (!bondAmount || !prices) return null;
-    const stroops = parseInt(bondAmount, 10);
-    if (isNaN(stroops) || stroops <= 0) return null;
-    const usdcValue = stroops / 10_000_000;
+    const usdcValue = parseFloat(bondAmount);
+    if (isNaN(usdcValue) || usdcValue <= 0) return null;
     const xlmValue = usdcValue / prices.xlmUsd;
-    return { usdc: usdcValue.toFixed(2), xlm: xlmValue.toFixed(2) };
+    const stroops = Math.round(usdcValue * 10_000_000);
+    return { usdc: usdcValue.toFixed(2), xlm: xlmValue.toFixed(2), stroops: stroops.toLocaleString() };
   })();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -201,6 +204,10 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
     setIsSubmitting(true);
 
     try {
+      // Convert USDC to stroops (1 USDC = 10,000,000 stroops)
+      const usdcValue = parseFloat(bondAmount);
+      const stroops = BigInt(Math.round(usdcValue * 10_000_000));
+
       const params: InitializeShipmentParams = {
         shipper: connectedAddress,
         usdcToken: usdcToken.trim(),
@@ -208,7 +215,7 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
         maxTemp: parseInt(maxTemp, 10),
         logisticsProvider: logisticsProvider.trim(),
         oracle: oracle.trim(),
-        bondAmount: BigInt(bondAmount),
+        bondAmount: stroops,
       };
 
       await onSubmit(params);
@@ -269,8 +276,9 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
         value={logisticsProvider}
         onChange={setLogisticsProvider}
         error={errors.logisticsProvider}
-        placeholder="G…"
+        placeholder="G… (wallet that will deposit the bond)"
         disabled={disabled}
+        helperText="The wallet address that will deposit the bond. Must be different from yours."
       />
       <FormField
         id="oracle"
@@ -278,41 +286,43 @@ export function CreateShipmentForm({ connectedAddress, onSubmit }: CreateShipmen
         value={oracle}
         onChange={setOracle}
         error={errors.oracle}
-        placeholder="G…"
+        placeholder="G… (wallet that reports temperatures)"
         disabled={disabled}
+        helperText="The wallet address authorized to report IoT temperature readings."
       />
       <FormField
         id="usdcToken"
-        label="USDC Token Address"
+        label="USDC Token Address (Demo)"
         value={usdcToken}
         onChange={setUsdcToken}
         error={errors.usdcToken}
         placeholder="C…"
         disabled={disabled}
+        helperText="Pre-filled for demo. No real USDC needed."
       />
 
-      {/* Bond amount */}
+      {/* Bond amount — now in USDC */}
       <FormField
         id="bondAmount"
-        label="Bond Amount (USDC stroops)"
+        label="Bond Amount (USDC)"
         type="number"
         value={bondAmount}
         onChange={setBondAmount}
         error={errors.bondAmount}
-        placeholder="e.g. 1000000000"
+        placeholder="e.g. 10"
         disabled={disabled}
-        helperText="1 USDC = 10,000,000 stroops"
+        helperText="Enter amount in USDC (e.g. 10 = 10 USDC)"
       />
 
       {/* Bond conversion preview */}
       {bondPreview && (
         <div className="flex items-center gap-3 -mt-2 px-1">
           <span className="text-xs text-frost-cyan font-mono font-semibold">
-            = {bondPreview.usdc} USDC
+            ≈ {bondPreview.xlm} XLM
           </span>
-          <span className="text-xs text-frost-gray/40">≈</span>
+          <span className="text-xs text-frost-gray/40">•</span>
           <span className="text-xs text-frost-gray font-mono">
-            {bondPreview.xlm} XLM
+            {bondPreview.stroops} stroops
           </span>
         </div>
       )}

@@ -200,6 +200,22 @@ export default function ProviderView() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <h1 className="text-xl font-bold text-frost-white tracking-tight">Provider Dashboard</h1>
 
+      {/* ── Wallet mismatch warning ──────────────────────────────────── */}
+      {hasShipment && !isProvider && (
+        <div className="flex items-start gap-3 rounded-xl border border-status-warning/40 bg-status-warning/5 px-5 py-4" role="alert">
+          <span className="text-lg" aria-hidden="true">⚠️</span>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-status-warning">Wrong wallet connected</p>
+            <p className="text-xs text-frost-gray">
+              This shipment requires the Logistics Provider wallet. Switch to the correct account in Freighter to deposit the bond.
+            </p>
+            <p className="text-xs text-frost-gray/70 font-mono mt-1">
+              Expected: {state.logisticsProvider.slice(0, 8)}…{state.logisticsProvider.slice(-4)}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Pending (Created) section ────────────────────────────────── */}
       {state.shipmentStatus === 'Created' && (
         <PendingShipmentCard
