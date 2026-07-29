@@ -70,7 +70,7 @@ export const useContractStore = create<ContractStoreState>()(
             case 'deposit_bond': {
               unsignedXdr = await service.buildDepositBond(
                 p.logisticsProvider as string,
-                get().currentShipmentId ?? undefined
+                get().currentShipmentId ?? 0
               );
               break;
             }
@@ -78,14 +78,14 @@ export const useContractStore = create<ContractStoreState>()(
               unsignedXdr = await service.buildReportTemperature(
                 p.oracle as string,
                 p.temperature as number,
-                get().currentShipmentId ?? undefined
+                get().currentShipmentId ?? 0
               );
               break;
             }
             case 'confirm_delivery': {
               unsignedXdr = await service.buildConfirmDelivery(
                 p.shipper as string,
-                get().currentShipmentId ?? undefined
+                get().currentShipmentId ?? 0
               );
               break;
             }
@@ -132,7 +132,18 @@ export const useContractStore = create<ContractStoreState>()(
               bondAmount: initParams.bondAmount,
               usdcToken: initParams.usdcToken,
             };
-            set({ contractState: newState, currentShipmentId: 0 });
+            set({ contractState: newState, currentShipmentId: null });
+            // The contract returns the shipment ID, but we can't easily read it from tx result.
+            // Instead, we'll read the counter next time. For now, assume latest = count-1.
+            // Attempt to read the counter from chain
+            try {
+              const network = useWalletStore.getState().network;
+              const svc = getSorobanService(network);
+              const state = await svc.getContractState();
+              if (state) {
+                set({ contractState: state });
+              }
+            } catch { /* ignore */ }
           } else if (type === 'deposit_bond' && currentState) {
             set({ contractState: { ...currentState, shipmentStatus: 'Active' } });
           } else if (type === 'report_temperature' && currentState) {

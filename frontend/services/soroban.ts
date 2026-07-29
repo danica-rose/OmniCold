@@ -244,7 +244,25 @@ export class SorobanService {
       // Parse the simulation error into a user-friendly message
       const rawError = simulated.error || '';
       
-      // Check for common contract errors
+      // Check for numeric contract error codes (Contract, #N)
+      const numericMatch = rawError.match(/Contract,\s*#?(\d+)/i);
+      if (numericMatch) {
+        const code = parseInt(numericMatch[1], 10);
+        const errorMessages: Record<number, string> = {
+          1: 'Min temperature must be less than max temperature.',
+          2: 'Bond amount must be greater than zero.',
+          3: 'All participant addresses must be unique (shipper, provider, oracle).',
+          4: 'Your connected wallet does not match the Logistics Provider address for this shipment. Switch to the correct Freighter account.',
+          5: 'Only the authorized Oracle can report temperatures.',
+          6: 'Only the Shipper can confirm delivery.',
+          7: 'This action is not available in the current shipment state.',
+          8: 'Shipment not found.',
+          9: 'USDC transfer failed — check balance and token allowance.',
+        };
+        throw new Error(errorMessages[code] || `Contract error #${code}`);
+      }
+
+      // Check for common contract errors by name
       if (rawError.includes('AlreadyInitialized') || rawError.includes('MissingValue')) {
         throw new Error('This contract has already been initialized. You need to deploy a new contract instance for a new shipment.');
       }
