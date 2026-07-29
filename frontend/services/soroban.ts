@@ -35,51 +35,51 @@ export class SorobanService {
     try {
       if (!this.contractId) return null;
 
-      // Use the contract's get_shipment_count to find the latest shipment
-      const contract = new Contract(this.contractId);
-      
-      // First get the count
-      const countOp = contract.call('get_shipment_count');
-      const countTx = new TransactionBuilder(
-        await this.server.getAccount(this.contractId),
-        { fee: '100', networkPassphrase: this.networkPassphrase }
-      ).addOperation(countOp).setTimeout(30).build();
-      
-      const countSim = await this.server.simulateTransaction(countTx);
-      if (SorobanRpc.Api.isSimulationError(countSim)) return null;
-      
-      // Parse count from simulation result
-      const countResult = (countSim as SorobanRpc.Api.SimulateTransactionSuccessResponse).result;
-      if (!countResult) return null;
-      
-      const countVal = countResult.retval;
-      const count = countVal.u32();
+      // Read the contract's persistent storage directly using getLedgerEntries
+      const contractAddress = new Address(this.contractId);
+
+      // Read the Counter key to find how many shipments exist
+      // StorageKey::Counter serializes as ScvVec([ScvSymbol("Counter")])
+      const counterKey = xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: contractAddress.toScAddress(),
+          key: xdr.ScVal.scvVec([xdr.ScVal.scvSymbol('Counter')]),
+          durability: xdr.ContractDataDurability.persistent(),
+        })
+      );
+
+      const counterResponse = await this.server.getLedgerEntries(counterKey);
+      if (!counterResponse.entries || counterResponse.entries.length === 0) {
+        return null; // No shipments yet
+      }
+
+      const counterVal = counterResponse.entries[0].val.contractData().val();
+      const count = counterVal.u32();
       if (count === 0) return null;
 
-      // Get the latest shipment (id = count - 1)
+      // Read the latest shipment (id = count - 1)
+      // StorageKey::Shipment(u32) serializes as ScvVec([ScvSymbol("Shipment"), ScvU32(id)])
       const latestId = count - 1;
-      const getOp = contract.call('get_shipment', nativeToScVal(latestId, { type: 'u32' }));
-      const getTx = new TransactionBuilder(
-        await this.server.getAccount(this.contractId),
-        { fee: '100', networkPassphrase: this.networkPassphrase }
-      ).addOperation(getOp).setTimeout(30).build();
+      const shipmentKey = xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: contractAddress.toScAddress(),
+          key: xdr.ScVal.scvVec([
+            xdr.ScVal.scvSymbol('Shipment'),
+            nativeToScVal(latestId, { type: 'u32' }),
+          ]),
+          durability: xdr.ContractDataDurability.persistent(),
+        })
+      );
 
-      const getSim = await this.server.simulateTransaction(getTx);
-      if (SorobanRpc.Api.isSimulationError(getSim)) return null;
+      const shipmentResponse = await this.server.getLedgerEntries(shipmentKey);
+      if (!shipmentResponse.entries || shipmentResponse.entries.length === 0) {
+        return null;
+      }
 
-      const getResult = (getSim as SorobanRpc.Api.SimulateTransactionSuccessResponse).result;
-      if (!getResult) return null;
-
-      // Parse the Shipment struct from the result
-      const retval = getResult.retval;
+      // Parse the Shipment struct
+      // Soroban structs serialize as ScvMap with symbol keys
+      const shipmentVal = shipmentResponse.entries[0].val.contractData().val();
       
-      // The result is an Option<Shipment> — if None, return null
-      if (retval.switch().name === 'scvVoid') return null;
-
-      // Parse the struct fields from ScvMap
-      const shipmentMap = retval.vec();
-      if (!shipmentMap || shipmentMap.length === 0) return null;
-
       let shipmentStatus: ContractState['shipmentStatus'] = 'Created';
       let minTemp = 0;
       let maxTemp = 0;
@@ -89,38 +89,35 @@ export class SorobanService {
       let bondAmount = 0n;
       let usdcToken = '';
 
-      // Soroban structs serialize as maps with symbol keys
-      for (const entry of shipmentMap) {
-        // Each entry in the vec might be a map entry
-        // Actually for Option<Struct>, the result is wrapped
-        // Let's try parsing as a struct map
-        if (entry.switch().name === 'scvMap') {
-          const map = entry.map();
-          if (map) {
-            for (const mapEntry of map) {
-              const key = mapEntry.key().sym().toString();
-              const val = mapEntry.val();
-              switch (key) {
-                case 'status': {
-                  const statusVec = val.vec();
-                  if (statusVec && statusVec.length > 0) {
-                    const statusName = statusVec[0].sym().toString();
-                    shipmentStatus = (statusName as ContractState['shipmentStatus']) ?? 'Created';
-                  }
-                  break;
+      // Struct is serialized as ScvMap
+      if (shipmentVal.switch().name === 'scvMap') {
+        const map = shipmentVal.map();
+        if (map) {
+          for (const entry of map) {
+            const key = entry.key().sym().toString();
+            const val = entry.val();
+            switch (key) {
+              case 'status': {
+                // Enum serializes as ScvVec([ScvSymbol(variant)])
+                const statusVec = val.vec();
+                if (statusVec && statusVec.length > 0) {
+                  const statusName = statusVec[0].sym().toString();
+                  shipmentStatus = (statusName as ContractState['shipmentStatus']) ?? 'Created';
                 }
-                case 'min_temp': minTemp = val.i32(); break;
-                case 'max_temp': maxTemp = val.i32(); break;
-                case 'shipper': shipper = Address.fromScVal(val).toString(); break;
-                case 'logistics_provider': logisticsProvider = Address.fromScVal(val).toString(); break;
-                case 'oracle': oracle = Address.fromScVal(val).toString(); break;
-                case 'bond_amount': {
-                  const i128 = val.i128();
-                  bondAmount = BigInt('0x' + i128.lo().toXDR('hex'));
-                  break;
-                }
-                case 'usdc_token': usdcToken = Address.fromScVal(val).toString(); break;
+                break;
               }
+              case 'min_temp': minTemp = val.i32(); break;
+              case 'max_temp': maxTemp = val.i32(); break;
+              case 'shipper': shipper = Address.fromScVal(val).toString(); break;
+              case 'logistics_provider': logisticsProvider = Address.fromScVal(val).toString(); break;
+              case 'oracle': oracle = Address.fromScVal(val).toString(); break;
+              case 'bond_amount': {
+                const i128 = val.i128();
+                const lo = BigInt(i128.lo().low) + (BigInt(i128.lo().high) << 32n);
+                bondAmount = lo;
+                break;
+              }
+              case 'usdc_token': usdcToken = Address.fromScVal(val).toString(); break;
             }
           }
         }

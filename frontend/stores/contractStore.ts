@@ -101,6 +101,11 @@ export const useContractStore = create<ContractStoreState>((set, get) => ({
       get().addTransaction(entry);
 
       set({ isTransactionPending: false });
+
+      // Re-fetch contract state after successful transaction
+      // Small delay to allow ledger to update
+      setTimeout(() => get().fetchContractState(), 2000);
+
       return result.txHash;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Transaction failed';
