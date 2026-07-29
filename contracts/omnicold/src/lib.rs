@@ -1,6 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{contract, contractimpl, contracttype, contracterror, token, Env, Address};
+use soroban_sdk::{contract, contractimpl, contracttype, contracterror, Env, Address, Symbol};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -11,31 +11,42 @@ pub enum ShipmentStatus {
     Breached,
 }
 
+/// Stores all data for a single shipment.
+#[contracttype]
+#[derive(Clone)]
+pub struct Shipment {
+    pub status: ShipmentStatus,
+    pub shipper: Address,
+    pub logistics_provider: Address,
+    pub oracle: Address,
+    pub min_temp: i32,
+    pub max_temp: i32,
+    pub bond_amount: i128,
+    pub usdc_token: Address,
+}
+
+/// Storage keys — shipments stored by ID, plus a global counter.
 #[contracttype]
 #[derive(Clone)]
 pub enum StorageKey {
-    ShipmentState,
-    MinTemp,
-    MaxTemp,
-    Shipper,
-    LogisticsProvider,
-    Oracle,
-    BondAmount,
-    UsdcToken,
+    /// Maps shipment_id (u32) → Shipment struct
+    Shipment(u32),
+    /// Global shipment counter
+    Counter,
 }
 
 #[contracterror]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 #[repr(u32)]
 pub enum ContractError {
-    AlreadyInitialized = 1,
-    InvalidTempRange = 2,
-    InvalidBondAmount = 3,
-    DuplicateParticipant = 4,
-    NotLogisticsProvider = 5,
-    NotOracle = 6,
-    NotShipper = 7,
-    InvalidState = 8,
+    InvalidTempRange = 1,
+    InvalidBondAmount = 2,
+    DuplicateParticipant = 3,
+    NotLogisticsProvider = 4,
+    NotOracle = 5,
+    NotShipper = 6,
+    InvalidState = 7,
+    ShipmentNotFound = 8,
     TransferFailed = 9,
 }
 
@@ -47,8 +58,8 @@ pub struct OmniColdContract;
 
 #[contractimpl]
 impl OmniColdContract {
-    /// Creates a new shipment with temperature thresholds and participant roles.
-    /// Caller (shipper) must authorize. State → Created.
+    /// Creates a new shipment. Returns the shipment ID.
+    /// Any wallet can create a shipment — no restrictions.
     pub fn initialize_shipment(
         env: Env,
         shipper: Address,
@@ -58,14 +69,8 @@ impl OmniColdContract {
         logistics_provider: Address,
         oracle: Address,
         bond_amount: i128,
-    ) -> Result<(), ContractError> {
-        // Authenticate the shipper
+    ) -> Result<u32, ContractError> {
         shipper.require_auth();
-
-        // Guard against re-initialization
-        if env.storage().persistent().has(&StorageKey::ShipmentState) {
-            return Err(ContractError::AlreadyInitialized);
-        }
 
         // Validate temperature range
         if min_temp >= max_temp {
@@ -78,177 +83,168 @@ impl OmniColdContract {
         }
 
         // Validate participant uniqueness
-        if logistics_provider == shipper || oracle == shipper {
+        if logistics_provider == shipper || oracle == shipper || oracle == logistics_provider {
             return Err(ContractError::DuplicateParticipant);
         }
 
-        // Store all fields to persistent storage
-        env.storage().persistent().set(&StorageKey::ShipmentState, &ShipmentStatus::Created);
-        env.storage().persistent().set(&StorageKey::MinTemp, &min_temp);
-        env.storage().persistent().set(&StorageKey::MaxTemp, &max_temp);
-        env.storage().persistent().set(&StorageKey::Shipper, &shipper);
-        env.storage().persistent().set(&StorageKey::LogisticsProvider, &logistics_provider);
-        env.storage().persistent().set(&StorageKey::Oracle, &oracle);
-        env.storage().persistent().set(&StorageKey::BondAmount, &bond_amount);
-        env.storage().persistent().set(&StorageKey::UsdcToken, &usdc_token);
+        // Get and increment the global counter
+        let shipment_id: u32 = env
+            .storage()
+            .persistent()
+            .get(&StorageKey::Counter)
+            .unwrap_or(0);
+        let next_id = shipment_id + 1;
+        env.storage().persistent().set(&StorageKey::Counter, &next_id);
 
-        // Extend TTL on all written keys
-        env.storage().persistent().extend_ttl(&StorageKey::ShipmentState, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MinTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MaxTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Shipper, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::LogisticsProvider, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Oracle, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::BondAmount, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::UsdcToken, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+        // Create the shipment struct
+        let shipment = Shipment {
+            status: ShipmentStatus::Created,
+            shipper,
+            logistics_provider,
+            oracle,
+            min_temp,
+            max_temp,
+            bond_amount,
+            usdc_token,
+        };
 
-        Ok(())
+        // Store the shipment
+        let key = StorageKey::Shipment(shipment_id);
+        env.storage().persistent().set(&key, &shipment);
+        env.storage().persistent().extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+        env.storage().persistent().extend_ttl(&StorageKey::Counter, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+
+        // Emit event
+        env.events().publish(
+            (Symbol::new(&env, "shipment_created"),),
+            shipment_id,
+        );
+
+        Ok(shipment_id)
     }
 
     /// Logistics provider deposits the bond. State: Created → Active.
-    pub fn deposit_bond(env: Env, logistics_provider: Address) -> Result<(), ContractError> {
-        // Authenticate the logistics provider
+    pub fn deposit_bond(env: Env, logistics_provider: Address, shipment_id: u32) -> Result<(), ContractError> {
         logistics_provider.require_auth();
 
-        // Read stored logistics provider and verify caller matches
-        let stored_lp: Address = env.storage().persistent().get(&StorageKey::LogisticsProvider).unwrap();
-        if logistics_provider != stored_lp {
+        let key = StorageKey::Shipment(shipment_id);
+        let mut shipment: Shipment = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .ok_or(ContractError::ShipmentNotFound)?;
+
+        // Verify caller is the designated LP
+        if logistics_provider != shipment.logistics_provider {
             return Err(ContractError::NotLogisticsProvider);
         }
 
-        // Verify shipment state is Created
-        let state: ShipmentStatus = env.storage().persistent().get(&StorageKey::ShipmentState).unwrap();
-        if state != ShipmentStatus::Created {
+        // Verify state
+        if shipment.status != ShipmentStatus::Created {
             return Err(ContractError::InvalidState);
         }
 
-        // Read bond amount and USDC token address from storage
-        let bond_amount: i128 = env.storage().persistent().get(&StorageKey::BondAmount).unwrap();
-        let usdc_token_address: Address = env.storage().persistent().get(&StorageKey::UsdcToken).unwrap();
+        // Demo mode: skip USDC transfer, just transition state
+        shipment.status = ShipmentStatus::Active;
+        env.storage().persistent().set(&key, &shipment);
+        env.storage().persistent().extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
 
-        // Transfer bond from LP to contract
-        let token_client = token::Client::new(&env, &usdc_token_address);
-        token_client.transfer(&logistics_provider, &env.current_contract_address(), &bond_amount);
-
-        // Transition state to Active
-        env.storage().persistent().set(&StorageKey::ShipmentState, &ShipmentStatus::Active);
-
-        // Extend TTL on all persistent keys
-        env.storage().persistent().extend_ttl(&StorageKey::ShipmentState, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MinTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MaxTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Shipper, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::LogisticsProvider, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Oracle, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::BondAmount, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::UsdcToken, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+        env.events().publish(
+            (Symbol::new(&env, "bond_deposited"),),
+            shipment_id,
+        );
 
         Ok(())
     }
 
-    /// Oracle reports a temperature reading. If out of range, triggers breach + slash.
-    /// State remains Active if in-range; transitions to Breached if out of range.
-    pub fn report_temperature(env: Env, oracle: Address, temperature: i32) -> Result<(), ContractError> {
-        // Authenticate the oracle
+    /// Oracle reports a temperature reading.
+    /// If out of range → breach. If in range → stays Active.
+    pub fn report_temperature(env: Env, oracle: Address, shipment_id: u32, temperature: i32) -> Result<(), ContractError> {
         oracle.require_auth();
 
-        // Read stored oracle address and verify caller matches
-        let stored_oracle: Address = env.storage().persistent().get(&StorageKey::Oracle).unwrap();
-        if oracle != stored_oracle {
+        let key = StorageKey::Shipment(shipment_id);
+        let mut shipment: Shipment = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .ok_or(ContractError::ShipmentNotFound)?;
+
+        // Verify caller is the designated oracle
+        if oracle != shipment.oracle {
             return Err(ContractError::NotOracle);
         }
 
-        // Verify shipment state is Active
-        let state: ShipmentStatus = env.storage().persistent().get(&StorageKey::ShipmentState).unwrap();
-        if state != ShipmentStatus::Active {
+        // Verify state
+        if shipment.status != ShipmentStatus::Active {
             return Err(ContractError::InvalidState);
         }
 
-        // Read temperature thresholds
-        let min_temp: i32 = env.storage().persistent().get(&StorageKey::MinTemp).unwrap();
-        let max_temp: i32 = env.storage().persistent().get(&StorageKey::MaxTemp).unwrap();
-
         // Check if temperature is within range
-        if temperature >= min_temp && temperature <= max_temp {
-            // In-range — extend TTL and return
-            env.storage().persistent().extend_ttl(&StorageKey::ShipmentState, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::MinTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::MaxTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::Shipper, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::LogisticsProvider, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::Oracle, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::BondAmount, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-            env.storage().persistent().extend_ttl(&StorageKey::UsdcToken, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-
+        if temperature >= shipment.min_temp && temperature <= shipment.max_temp {
+            // In-range — just bump TTL
+            env.storage().persistent().extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
             return Ok(());
         }
 
-        // Out-of-range — trigger breach and slash
-        let bond_amount: i128 = env.storage().persistent().get(&StorageKey::BondAmount).unwrap();
-        let usdc_token: Address = env.storage().persistent().get(&StorageKey::UsdcToken).unwrap();
-        let shipper: Address = env.storage().persistent().get(&StorageKey::Shipper).unwrap();
+        // Out-of-range — breach (demo mode: no USDC transfer)
+        shipment.status = ShipmentStatus::Breached;
+        env.storage().persistent().set(&key, &shipment);
+        env.storage().persistent().extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
 
-        // Transfer full bond from contract to shipper
-        let token_client = token::Client::new(&env, &usdc_token);
-        token_client.transfer(&env.current_contract_address(), &shipper, &bond_amount);
-
-        // Transition state to Breached
-        env.storage().persistent().set(&StorageKey::ShipmentState, &ShipmentStatus::Breached);
-
-        // Extend TTL on all persistent keys
-        env.storage().persistent().extend_ttl(&StorageKey::ShipmentState, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MinTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MaxTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Shipper, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::LogisticsProvider, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Oracle, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::BondAmount, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::UsdcToken, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+        env.events().publish(
+            (Symbol::new(&env, "breach_detected"),),
+            shipment_id,
+        );
 
         Ok(())
     }
 
-    /// Shipper confirms delivery. Bond returned to logistics provider.
-    /// State: Active → Delivered.
-    pub fn confirm_delivery(env: Env, shipper: Address) -> Result<(), ContractError> {
-        // Authenticate the shipper
+    /// Shipper confirms delivery. State: Active → Delivered.
+    pub fn confirm_delivery(env: Env, shipper: Address, shipment_id: u32) -> Result<(), ContractError> {
         shipper.require_auth();
 
-        // Read stored shipper address and verify caller matches
-        let stored_shipper: Address = env.storage().persistent().get(&StorageKey::Shipper).unwrap();
-        if shipper != stored_shipper {
+        let key = StorageKey::Shipment(shipment_id);
+        let mut shipment: Shipment = env
+            .storage()
+            .persistent()
+            .get(&key)
+            .ok_or(ContractError::ShipmentNotFound)?;
+
+        // Verify caller is the shipper
+        if shipper != shipment.shipper {
             return Err(ContractError::NotShipper);
         }
 
-        // Verify shipment state is Active
-        let state: ShipmentStatus = env.storage().persistent().get(&StorageKey::ShipmentState).unwrap();
-        if state != ShipmentStatus::Active {
+        // Verify state
+        if shipment.status != ShipmentStatus::Active {
             return Err(ContractError::InvalidState);
         }
 
-        // Read bond amount, USDC token address, and logistics provider from storage
-        let bond_amount: i128 = env.storage().persistent().get(&StorageKey::BondAmount).unwrap();
-        let usdc_token: Address = env.storage().persistent().get(&StorageKey::UsdcToken).unwrap();
-        let logistics_provider: Address = env.storage().persistent().get(&StorageKey::LogisticsProvider).unwrap();
+        // Demo mode: no USDC transfer, just transition
+        shipment.status = ShipmentStatus::Delivered;
+        env.storage().persistent().set(&key, &shipment);
+        env.storage().persistent().extend_ttl(&key, LIFETIME_THRESHOLD, BUMP_AMOUNT);
 
-        // Transfer full bond from contract to logistics provider
-        let token_client = token::Client::new(&env, &usdc_token);
-        token_client.transfer(&env.current_contract_address(), &logistics_provider, &bond_amount);
-
-        // Transition state to Delivered
-        env.storage().persistent().set(&StorageKey::ShipmentState, &ShipmentStatus::Delivered);
-
-        // Extend TTL on all persistent keys
-        env.storage().persistent().extend_ttl(&StorageKey::ShipmentState, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MinTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::MaxTemp, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Shipper, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::LogisticsProvider, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::Oracle, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::BondAmount, LIFETIME_THRESHOLD, BUMP_AMOUNT);
-        env.storage().persistent().extend_ttl(&StorageKey::UsdcToken, LIFETIME_THRESHOLD, BUMP_AMOUNT);
+        env.events().publish(
+            (Symbol::new(&env, "delivery_confirmed"),),
+            shipment_id,
+        );
 
         Ok(())
+    }
+
+    /// Read a shipment's data. Returns None if not found.
+    pub fn get_shipment(env: Env, shipment_id: u32) -> Option<Shipment> {
+        let key = StorageKey::Shipment(shipment_id);
+        env.storage().persistent().get(&key)
+    }
+
+    /// Get the total number of shipments created.
+    pub fn get_shipment_count(env: Env) -> u32 {
+        env.storage()
+            .persistent()
+            .get(&StorageKey::Counter)
+            .unwrap_or(0)
     }
 }
 
