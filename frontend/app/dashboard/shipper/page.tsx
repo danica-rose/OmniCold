@@ -82,6 +82,7 @@ export default function ShipperView() {
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   async function handleInitializeShipment(params: InitializeShipmentParams) {
+    showToast('success', 'Transaction signed! Submitting to Stellar testnet...');
     await submitTransaction('initialize_shipment', params);
     await fetchContractState();
   }

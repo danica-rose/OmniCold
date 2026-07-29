@@ -78,6 +78,10 @@ export const useContractStore = create<ContractStoreState>((set, get) => ({
       // Sign with Freighter
       const signedXdr = await signTransaction(unsignedXdr, network);
 
+      // Show progress - import showToast at top won't work in store, 
+      // so we'll set a status message
+      set({ error: null });
+
       // Submit to network
       const result = await service.submitTransaction(signedXdr);
 
