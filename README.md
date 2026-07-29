@@ -2,67 +2,39 @@
 
 > IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. Automated penalty enforcement with zero human intervention.
 
-[![Stellar](https://img.shields.io/badge/Stellar-Testnet-blue?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://omni-cold.vercel.app)
-[![Rust](https://img.shields.io/badge/Rust-Soroban-orange?logo=rust)](./contracts/omnicold/src/lib.rs)
-[![Tests](https://img.shields.io/badge/Tests-22%20passing-green)](./contracts/omnicold/src/test.rs)
-[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
+<p align="center">
+  <a href="https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO"><img src="https://img.shields.io/badge/Stellar-Testnet_Live-4B0082?style=for-the-badge&logo=stellar&logoColor=white" alt="Stellar"></a>
+  <a href="https://omni-cold.vercel.app"><img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"></a>
+  <a href="./contracts/omnicold/src/lib.rs"><img src="https://img.shields.io/badge/Rust-Soroban_SDK_22-DEA584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust"></a>
+  <a href="./contracts/omnicold/src/test.rs"><img src="https://img.shields.io/badge/Tests-22_passing-2EA44F?style=for-the-badge" alt="Tests"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"></a>
+</p>
 
 ---
 
 ## Table of Contents
 
-- [🚀 Live Deployment](#live-deployment)
-- [👛 Wallet Integration](#wallet-integration)
 - [Problem](#problem)
 - [Solution](#solution)
-- [🏗️ Architecture](#architecture)
+- [🚀 Live Deployment](#-live-deployment)
+- [👛 Wallet Integration](#-wallet-integration)
+- [🏗️ Architecture](#️-architecture)
 - [Contract Entry Points](#contract-entry-points)
 - [Shipment Lifecycle](#shipment-lifecycle)
 - [Currency Support](#currency-support)
-- [📁 Project Structure](#project-structure)
+- [📁 Project Structure](#-project-structure)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [✨ Features](#features)
-- [📸 Screenshots](#screenshots)
-- [🌐 Deployed Contract](#deployed-contract)
-- [🧪 Testing](#testing)
+- [✨ Features](#-features)
+- [📸 Screenshots](#-screenshots)
+- [🌐 Deployed Contract](#-deployed-contract)
+- [🧪 Testing](#-testing)
 - [Level 1 Compliance](#level-1-compliance)
 - [Level 2 Compliance](#level-2-compliance)
 - [Level 3 Compliance](#level-3-compliance)
-- [💡 Idea Submission](#idea-submission)
-- [📝 Submission Checklist](#submission-checklist)
+- [💡 Idea Submission](#-idea-submission)
+- [📝 Submission Checklist](#-submission-checklist)
 - [License](#license)
-
----
-
-## 🚀 Live Deployment
-
-| | |
-|---|---|
-| **Contract ID** | `CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO` |
-| **Network** | Stellar Testnet |
-| **Explorer** | [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO) |
-| **Deploy TX** | [View on StellarExpert](https://stellar.expert/explorer/testnet/tx/a0c17f7a92c42553615ac4514ebcb1cf764e243bf645bef27c3438a64adcd437) |
-| **Live App** | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
-
----
-
-## 👛 Wallet Integration
-
-> Full details: [WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)
-
-| Feature | Implementation | File |
-|---------|---------------|------|
-| **Wallet Library** | `@stellar/freighter-api` v2.0.0 | `frontend/package.json` |
-| **Connect Wallet** | `freighter.requestAccess()` → stores public key | `frontend/stores/walletStore.ts` |
-| **Disconnect Wallet** | Clears address, balance, connection state | `frontend/stores/walletStore.ts` |
-| **Sign Transaction** | `freighter.signTransaction(xdr, {networkPassphrase})` | `frontend/services/freighter.ts` |
-| **Get Address** | `freighter.requestAccess()` returns G... address | `frontend/services/freighter.ts` |
-| **Detect Wallet** | `freighter.isConnected()` checks extension | `frontend/services/freighter.ts` |
-| **XLM Balance** | Fetched from Horizon `/accounts/{address}` | `frontend/stores/walletStore.ts` |
-| **Connect UI** | WalletButton component in NavHeader | `frontend/components/layout/WalletButton.tsx` |
-| **TX Submission** | Build XDR → Sign → Submit to Soroban RPC | `frontend/stores/contractStore.ts` |
 
 ---
 
@@ -98,6 +70,36 @@ Cold-chain logistics for pharmaceuticals face critical accountability gaps:
 3. IoT sensors report temperatures on-chain via authorized oracle
 4. Breach detected → bond atomically slashed to shipper
 5. Delivery confirmed → bond released back to provider
+
+---
+
+## 🚀 Live Deployment
+
+| | |
+|---|---|
+| **Contract ID** | `CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO` |
+| **Network** | Stellar Testnet |
+| **Explorer** | [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO) |
+| **Deploy TX** | [View on StellarExpert](https://stellar.expert/explorer/testnet/tx/a0c17f7a92c42553615ac4514ebcb1cf764e243bf645bef27c3438a64adcd437) |
+| **Live App** | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
+
+---
+
+## 👛 Wallet Integration
+
+> Full details: [WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)
+
+| Feature | Implementation | File |
+|---------|---------------|------|
+| **Wallet Library** | `@stellar/freighter-api` v2.0.0 | `frontend/package.json` |
+| **Connect Wallet** | `freighter.requestAccess()` → stores public key | `frontend/stores/walletStore.ts` |
+| **Disconnect Wallet** | Clears address, balance, connection state | `frontend/stores/walletStore.ts` |
+| **Sign Transaction** | `freighter.signTransaction(xdr, {networkPassphrase})` | `frontend/services/freighter.ts` |
+| **Get Address** | `freighter.requestAccess()` returns G... address | `frontend/services/freighter.ts` |
+| **Detect Wallet** | `freighter.isConnected()` checks extension | `frontend/services/freighter.ts` |
+| **XLM Balance** | Fetched from Horizon `/accounts/{address}` | `frontend/stores/walletStore.ts` |
+| **Connect UI** | WalletButton component in NavHeader | `frontend/components/layout/WalletButton.tsx` |
+| **TX Submission** | Build XDR → Sign → Submit to Soroban RPC | `frontend/stores/contractStore.ts` |
 
 ---
 
@@ -188,18 +190,9 @@ omnicold/
 
 ```bash
 cd contracts/omnicold
-
-# Build
-stellar contract build
-
-# Test (12 tests)
-cargo test
-
-# Deploy to testnet
-stellar contract deploy \
-  --wasm target/wasm32v1-none/release/omnicold.wasm \
-  --network testnet \
-  --source <YOUR_IDENTITY>
+stellar contract build    # Build WASM
+cargo test                # Run 12 tests
+stellar contract deploy --wasm target/wasm32v1-none/release/omnicold.wasm --network testnet --source <YOUR_IDENTITY>
 ```
 
 ### Frontend
@@ -207,11 +200,9 @@ stellar contract deploy \
 ```bash
 cd frontend
 npm install
-npm run dev    # development server
-npm test       # run tests (10 tests)
+npm run dev    # development server at localhost:3000
+npm test       # run 10 tests
 ```
-
-Open [http://localhost:3000](http://localhost:3000) and connect your Freighter wallet.
 
 ---
 
@@ -226,7 +217,6 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 - FAQ section and landing page
 - Mobile responsive (hamburger nav, fluid grids)
 - WCAG 2.1 AA accessible
-- Reduced motion support
 - Toast notifications for transaction feedback
 - Persistent state via localStorage
 
@@ -238,7 +228,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ![Landing Page](./docs/screenshots/landing-page.png)
 
-> The landing page introduces OmniCold with an animated aurora background, a clear value proposition ("IoT-integrated escrow for cold-chain logistics"), trust signals (USDC bond, ~5s slash latency, zero human arbitration), and a prominent "Launch App" CTA that triggers Freighter wallet connection.
+> The landing page features an animated aurora background, clear value proposition, trust signals (USDC bond, ~5s slash latency, zero arbitration), and a "Launch App" CTA that triggers Freighter wallet connection.
 
 ---
 
@@ -246,7 +236,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ![Wallet Connection](./docs/screenshots/wallet-connect.png)
 
-> Clicking "Launch App" or "Connect Wallet" triggers the Freighter browser extension popup. The user approves the connection, and their Stellar public key (G...) is stored in the app. The XLM balance is fetched from Horizon and displayed in the navigation header.
+> Freighter extension popup appears on connect. User approves, public key is stored, XLM balance fetched from Horizon and displayed in the nav header.
 
 ---
 
@@ -254,7 +244,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ![Create Shipment](./docs/screenshots/create-shipment.png)
 
-> The Shipper dashboard allows creating new shipments by specifying temperature thresholds (in centidegrees), logistics provider address, oracle address, USDC token address (pre-filled for demo), and bond amount in USDC. Live conversion to XLM and stroops is shown below the bond field.
+> Shipper sets temperature thresholds, provider/oracle addresses, USDC token (pre-filled), and bond amount in USDC with live XLM conversion preview.
 
 ---
 
@@ -262,7 +252,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ![Provider Dashboard](./docs/screenshots/provider-dashboard.png)
 
-> After switching to the Provider role and connecting with the logistics provider wallet, the Provider Dashboard shows pending bond deposits with shipment details (shipper, temp range, oracle, bond required). Clicking "Deposit Bond" signs and submits the transaction to activate the shipment.
+> Shows pending bond deposits with shipment details. "Deposit Bond" button signs and submits the transaction. Wallet mismatch warning shows if wrong account is connected.
 
 ---
 
@@ -270,31 +260,15 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ![Oracle Dashboard](./docs/screenshots/oracle-dashboard.png)
 
-> The Oracle Dashboard displays the temperature gauge (270° SVG arc), current thresholds, and an input form for reporting readings. If the oracle reports a temperature outside the safe range, the contract automatically transitions to "Breached" state.
+> Temperature gauge (270° SVG arc), threshold labels, and input form. Out-of-range reports trigger automatic breach detection on-chain.
 
 ---
 
-### 6. Shipment Pipeline — State Transitions
-
-![Shipment Pipeline](./docs/screenshots/shipment-pipeline.png)
-
-> The animated shipment pipeline shows the current lifecycle state (Created → Active → Delivered/Breached). Each state transition is triggered by an on-chain transaction and reflected in real-time via the Zustand store.
-
----
-
-### 7. Transaction History
-
-![Transaction History](./docs/screenshots/tx-history.png)
-
-> Every contract interaction is logged in the Transaction History component with type (initialize, deposit, report, confirm), invoker address, timestamp, status (success/failure), and a clickable transaction hash linking to Stellar Explorer.
-
----
-
-### 8. Mobile Responsive UI
+### 6. Mobile Responsive
 
 ![Mobile View](./docs/screenshots/mobile-responsive.png)
 
-> The entire app is mobile responsive using Tailwind CSS breakpoints. Navigation collapses to a hamburger menu, cards stack vertically, and all touch targets meet the 44px minimum WCAG requirement.
+> Hamburger nav, stacked cards, fluid grids. All touch targets meet 44px minimum.
 
 ---
 
@@ -304,13 +278,11 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
   `CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO` · [view on Stellar Expert ↗](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO)
 
-![Stellar Expert Contract](./docs/screenshots/stellar-expert.png)
+![Stellar Expert](./docs/screenshots/stellar-expert.png)
 
-> The contract is deployed on Stellar Testnet and verifiable on Stellar Expert. The contract page shows the WASM hash, creation date, data storage entries, and a full history of all transactions (initialize_shipment, deposit_bond, report_temperature, confirm_delivery).
+> Every transaction (initialize, deposit, report, confirm) is verifiable on Stellar Expert. The contract is the source of truth.
 
 - **Live web app:** [omni-cold.vercel.app](https://omni-cold.vercel.app)
-
-Every initialization, bond deposit, temperature report, and delivery confirmation can be verified independently on Stellar Expert — the contract itself is the source of truth.
 
 ---
 
@@ -318,7 +290,7 @@ Every initialization, bond deposit, temperature report, and delivery confirmatio
 
 | Type | Count | Framework |
 |------|-------|-----------|
-| Contract unit tests | 12 | `soroban_sdk::testutils` |
+| Contract tests | 12 | `soroban_sdk::testutils` |
 | Frontend tests | 10 | Vitest + fast-check |
 | **Total** | **22** | All passing |
 
@@ -326,101 +298,68 @@ Every initialization, bond deposit, temperature report, and delivery confirmatio
 
 ## Level 1 Compliance
 
-> How OmniCold fulfills each White Belt requirement.
+> White Belt requirements fulfilled.
 
 | Requirement | Implementation |
 |-------------|---------------|
-| **Wallet Setup** | `@stellar/freighter-api` integrated, Stellar Testnet (`stores/walletStore.ts`) |
-| **Wallet Connect** | `connect()` calls `freighter.requestAccess()`, stores public key |
-| **Wallet Disconnect** | `disconnect()` clears address, balance, connection state |
-| **Fetch XLM Balance** | `fetchBalance()` queries Horizon `/accounts/{address}` |
-| **Display Balance** | XLM shown in NavHeader wallet dropdown with USD/PHP conversion |
-| **Send Transaction** | `SorobanService.submitTransaction()` sends signed XDR to Soroban RPC |
-| **Transaction Feedback** | Toast notifications + TX hash in TxHistory component |
-| **Dev Standards** | TypeScript strict, Zustand, Vitest + fast-check, Tailwind CSS |
+| **Wallet Setup** | `@stellar/freighter-api`, Stellar Testnet |
+| **Wallet Connect** | `freighter.requestAccess()` → stores public key |
+| **Wallet Disconnect** | Clears address, balance, connection state |
+| **Fetch XLM Balance** | Horizon `/accounts/{address}` endpoint |
+| **Display Balance** | NavHeader wallet dropdown with USD/PHP conversion |
+| **Send Transaction** | Signed XDR submitted to Soroban RPC |
+| **Transaction Feedback** | Toast notifications + TxHistory component |
+| **Dev Standards** | TypeScript strict, Zustand, Vitest, Tailwind |
 
 ---
 
 ## Level 2 Compliance
 
-> How OmniCold fulfills each Green Belt requirement.
+> Green Belt requirements fulfilled.
 
 | Requirement | Implementation |
 |-------------|---------------|
-| **3+ Error Types** | 9 contract errors mapped. Frontend catches wallet-not-found, user-rejected, insufficient-balance |
-| **Contract Deployed** | [`CCE3VM3W...ECRAO`](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO) on Testnet |
-| **Contract Called from Frontend** | `SorobanService` builds XDR → signs via Freighter → submits to RPC |
-| **Transaction Status Visible** | `isTransactionPending` + polling + Toast + TxHistory |
-| **2+ Meaningful Commits** | Multiple feature commits across contract, frontend, testing |
-| **Real-time Integration** | Polling service + Zustand subscriptions + auto-refresh |
+| **3+ Error Types** | 9 contract errors + wallet-not-found, user-rejected, insufficient-balance |
+| **Contract Deployed** | [`CCE3VM3W...ECRAO`](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO) |
+| **Contract Called from Frontend** | Build XDR → Freighter sign → Submit to RPC |
+| **Transaction Status Visible** | Pending state + polling + Toast + TxHistory |
+| **2+ Meaningful Commits** | ✅ Multiple commits |
+| **Real-time Integration** | PollingService + Zustand subscriptions |
 
 ---
 
 ## Level 3 Compliance
 
-> How OmniCold fulfills each Black Belt requirement.
+> Black Belt requirements fulfilled.
 
 | Requirement | Implementation |
 |-------------|---------------|
-| **Advanced Smart Contract** | Multi-shipment factory pattern, counter-based IDs, struct storage, event emission, TTL management |
-| **Inter-Contract Communication** | Contract interacts with USDC SAC token contract via `token::Client` for bond transfers |
-| **Event Streaming & Real-time** | Contract emits events (`shipment_created`, `bond_deposited`, `breach_detected`, `delivery_confirmed`). Frontend polls via `PollingService` with tab-visibility awareness |
-| **CI/CD Pipeline** | GitHub Actions (`.github/workflows/ci.yml`) — contract tests + frontend type-check + frontend tests on push/PR |
-| **Contract Deployment Workflow** | `stellar contract build` + `stellar contract deploy`. WASM optimized to 6.9KB |
-| **Mobile Responsive** | Tailwind responsive breakpoints, hamburger nav, fluid grids, 44px min touch targets |
-| **Error Handling & Loading** | 9 error codes → user-friendly messages. SkeletonLoader components. Loading/pending states. Toast notifications |
-| **Tests (3+ passing)** | **22 total** — 12 contract tests + 10 frontend tests, all passing |
-| **Production-Ready Architecture** | TypeScript strict, Zustand persist, service layer pattern, env configs, error boundaries |
-| **Documentation & Demo** | README, WALLET_INTEGRATION.md, JSDoc/Rustdoc, 12-slide HTML demo |
+| **Advanced Smart Contract** | Multi-shipment factory, counter IDs, struct storage, events, TTL |
+| **Inter-Contract Communication** | USDC SAC token interaction via `token::Client` |
+| **Event Streaming** | Contract emits events. Frontend polls with tab-visibility awareness |
+| **CI/CD Pipeline** | GitHub Actions — contract tests + frontend tests + deploy |
+| **Contract Deployment** | `stellar contract build` + deploy. WASM 6.9KB optimized |
+| **Mobile Responsive** | Tailwind breakpoints, hamburger nav, 44px touch targets |
+| **Error Handling & Loading** | 9 error codes, SkeletonLoader, pending states, toasts |
+| **Tests (3+ passing)** | **22 total** (12 contract + 10 frontend) |
+| **Production Architecture** | TypeScript strict, Zustand persist, service layer, env configs |
+| **Documentation & Demo** | README, WALLET_INTEGRATION.md, 12-slide HTML demo |
 
-### Test Results
+### Test Output
 
-**Contract (12/12 passing):**
 ```
-test test::test_happy_path_full_lifecycle ............. ok
-test test::test_unauthorized_oracle_rejected .......... ok
-test test::test_breach_detected_state_transition ...... ok
-test test::test_duplicate_report_after_breach_rejected  ok
-test test::test_initialization_validation ............. ok
-test test::test_multiple_shipments .................... ok
-test test::test_wrong_provider_cannot_deposit ......... ok
-test test::test_wrong_shipper_cannot_confirm .......... ok
-test test::test_shipment_not_found .................... ok
-test test::test_cold_breach ........................... ok
-test test::test_cannot_confirm_after_breach ........... ok
-test test::test_get_shipment_data ..................... ok
-```
-
-**Frontend (10/10 passing):**
-```
-Test Files  1 passed (1)
-     Tests  10 passed (10)
+Contract: 12 passed; 0 failed
+Frontend: 10 passed (1 test file)
+Total:    22 tests passing
 ```
 
 ### CI/CD Pipeline
 
-File: `.github/workflows/ci.yml`
-
-| Job | What it does |
-|-----|-------------|
+| Job | Action |
+|-----|--------|
 | Contract Build & Test | `cargo test` + WASM build |
 | Frontend Build & Test | `tsc --noEmit` + `npm test` |
-| Deploy to Vercel | Auto-deploys on main after tests pass |
-
-### Level 3 Submission Checklist
-
-| Item | Status |
-|------|--------|
-| Public GitHub repository | ✅ |
-| README with complete documentation | ✅ |
-| 10+ meaningful commits | ✅ |
-| Live demo link | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
-| Contract deployment address | `CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO` |
-| Transaction hash | [View](https://stellar.expert/explorer/testnet/tx/a0c17f7a92c42553615ac4514ebcb1cf764e243bf645bef27c3438a64adcd437) |
-| Mobile responsive UI | ✅ Tailwind responsive + hamburger nav |
-| CI/CD pipeline running | ✅ `.github/workflows/ci.yml` |
-| 3+ passing tests | ✅ 22 tests (12 contract + 10 frontend) |
-| Demo video | [HTML Demo](./demo/index.html) |
+| Deploy | Auto-deploys to Vercel on main |
 
 ---
 
@@ -428,64 +367,52 @@ File: `.github/workflows/ci.yml`
 
 ### 1. Problem Statement
 
-Cold-chain logistics lacks trustless, automated penalty enforcement when temperature thresholds are breached. Current process: manual claims, delayed arbitration, opaque sensor data.
-
-- Shippers wait weeks/months for compensation
-- No immutable audit trail — providers contest data
-- Zero automated penalty for SLA violations
-- **$35B+** annual pharmaceutical waste from cold-chain failures
+Cold-chain logistics lacks trustless penalty enforcement. Manual claims, delayed arbitration, opaque sensor data. **$35B+** annual pharma waste.
 
 ### 2. Why Stellar?
 
 | Feature | Benefit |
 |---------|---------|
-| Native USDC | Real dollars, not volatile tokens. Circle-issued. |
+| Native USDC | Real dollars, Circle-issued |
 | 5-second finality | Breach → slash in one block |
-| Sub-cent fees | ~$0.0001/tx. Monitor 48hr shipment for <$0.02 |
-| Soroban contracts | Rust + WASM. Deterministic, auditable |
-| Enterprise network | MoneyGram, Circle, Wise use Stellar |
+| Sub-cent fees | ~$0.0001/tx |
+| Soroban | Rust + WASM, deterministic |
+| Enterprise | MoneyGram, Circle, Wise |
 
 ### 3. Target Users
 
-| User | Role | Incentive |
-|------|------|-----------|
-| Pharmaceutical Distributors | Shipper | Instant compensation on breach |
-| Cold-Chain Providers | Provider | Competitive differentiation via bond |
-| IoT Oracle Operators | Oracle | Recurring revenue from services |
-| Cargo Insurers | Observer | Reduced claims processing costs |
+| User | Role |
+|------|------|
+| Pharma Distributors | Shipper — instant compensation on breach |
+| Cold-Chain Providers | Provider — competitive differentiation via bond |
+| IoT Operators | Oracle — recurring revenue |
+| Cargo Insurers | Observer — reduced claims costs |
 
-### 4. Technical Architecture
+### 4. Architecture
 
 ```
-┌──────────────┐     ┌────────────────┐     ┌──────────────┐
-│  Next.js App │────►│  Soroban RPC   │────►│  Stellar     │
-│  (Vercel)    │◄────│  (Testnet)     │◄────│  Validators  │
-└──────────────┘     └────────────────┘     └──────────────┘
-       │                                           │
-       ▼                                           ▼
-┌──────────────┐                           ┌──────────────┐
-│  Freighter   │                           │  OmniCold    │
-│  Wallet      │                           │  Contract    │
-└──────────────┘                           └──────────────┘
+Next.js (Vercel) ←→ Soroban RPC ←→ Stellar Validators ←→ OmniCold Contract
+       ↕
+  Freighter Wallet
 ```
 
-### 5. Complexity Evaluation
+### 5. Complexity
 
 1. Atomic multi-party token transfers
-2. Irreversible state machine with access control
+2. Irreversible state machine
 3. IoT-to-blockchain oracle problem
 4. Soroban TTL management
-5. i128 arithmetic in WASM
-6. XDR type marshalling (TS ↔ Soroban)
+5. i128 WASM arithmetic
+6. XDR type marshalling
 
 ### 6. Roadmap
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| MVP | ✅ Complete | Multi-shipment contract, dashboard, Freighter, Vercel |
-| Pilot | Next | Partner with pharma distributor for testnet pilot |
-| Multi-Oracle | Planned | 2-of-3 consensus before breach trigger |
-| Mainnet | Planned | Real USDC, graduated penalties, cross-border |
+| Phase | Status |
+|-------|--------|
+| MVP | ✅ Complete |
+| Pilot | Next |
+| Multi-Oracle | Planned |
+| Mainnet | Planned |
 
 ---
 
@@ -494,11 +421,15 @@ Cold-chain logistics lacks trustless, automated penalty enforcement when tempera
 | Item | Status |
 |------|--------|
 | Public GitHub repository | ✅ |
-| README with setup instructions | ✅ |
+| README with complete docs | ✅ |
 | 10+ meaningful commits | ✅ |
-| Live demo link | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
+| Live demo | [omni-cold.vercel.app](https://omni-cold.vercel.app) |
 | Contract address | `CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO` |
 | Transaction hash | [View](https://stellar.expert/explorer/testnet/tx/a0c17f7a92c42553615ac4514ebcb1cf764e243bf645bef27c3438a64adcd437) |
+| Mobile responsive | ✅ |
+| CI/CD pipeline | ✅ `.github/workflows/ci.yml` |
+| 3+ passing tests | ✅ 22 tests |
+| Demo | [HTML Demo](./demo/index.html) |
 
 ---
 
