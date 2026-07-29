@@ -245,31 +245,10 @@
     .compare-table tr:nth-child(6) { animation-delay: 0.6s; }
   </style>
   <style>
-    /* Navigation */
-    .nav { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 100; }
-    .nav-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.3);
-      cursor: pointer; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
-    }
-    .nav-dot.active {
-      background: #00D4FF; transform: scale(1.4);
-      box-shadow: 0 0 14px rgba(0,212,255,0.6);
-    }
-    .slide-number { position: fixed; top: 30px; right: 40px; font-size: 0.8rem; color: #94A3B8; z-index: 100; }
-    .controls { position: fixed; bottom: 38px; right: 40px; display: flex; gap: 8px; z-index: 100; }
-    .controls button {
-      padding: 10px 22px; border-radius: 10px;
-      border: 1px solid rgba(0,212,255,0.3); background: rgba(0,212,255,0.05);
-      color: #00D4FF; font-weight: 600; font-size: 0.85rem;
-      cursor: pointer; transition: all 0.3s;
-      backdrop-filter: blur(8px);
-    }
-    .controls button:hover {
-      background: rgba(0,212,255,0.2); border-color: #00D4FF;
-      box-shadow: 0 4px 16px rgba(0,212,255,0.2);
-      transform: translateY(-2px);
-    }
+    /* Navigation removed — arrow keys only */
+    .slide-number { display: none; }
+    .nav { display: none; }
+    .controls { display: none; }
     /* Keyframes */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -429,13 +408,7 @@
     </div>
   </div>
 
-  <!-- Navigation -->
-  <div class="nav" id="nav"></div>
-  <span class="slide-number" id="slide-num">1 / 12</span>
-  <div class="controls">
-    <button onclick="prevSlide()"><i data-lucide="chevron-left" width="16" height="16" style="display:inline"></i> Prev</button>
-    <button onclick="nextSlide()">Next <i data-lucide="chevron-right" width="16" height="16" style="display:inline"></i></button>
-  </div>
+  <!-- Navigation removed — use arrow keys only -->
 
   <script>
     // Particle system
@@ -452,27 +425,15 @@
       particleContainer.appendChild(p);
     }
 
-    // Slide navigation
+    // Slide navigation — keyboard only
     const slides = document.querySelectorAll('.slide');
-    const nav = document.getElementById('nav');
-    const slideNum = document.getElementById('slide-num');
     let current = 0;
     let autoPlay = null;
 
-    slides.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
-      dot.onclick = () => { clearInterval(autoPlay); goToSlide(i); };
-      nav.appendChild(dot);
-    });
-
     function goToSlide(index) {
       slides[current].classList.remove('active');
-      nav.children[current].classList.remove('active');
       current = index;
       slides[current].classList.add('active');
-      nav.children[current].classList.add('active');
-      slideNum.textContent = `${current + 1} / ${slides.length}`;
     }
 
     function nextSlide() { goToSlide((current + 1) % slides.length); }
