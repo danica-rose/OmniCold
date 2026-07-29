@@ -3,11 +3,22 @@
 > IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. Automated penalty enforcement with zero human intervention.
 
 <p align="center">
-  <a href="https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO"><img src="https://img.shields.io/badge/Stellar-Testnet_Live-4B0082?style=for-the-badge&logo=stellar&logoColor=white" alt="Stellar"></a>
-  <a href="https://omni-cold.vercel.app"><img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"></a>
-  <a href="./contracts/omnicold/src/lib.rs"><img src="https://img.shields.io/badge/Rust-Soroban_SDK_22-DEA584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust"></a>
-  <a href="./contracts/omnicold/src/test.rs"><img src="https://img.shields.io/badge/Tests-22_passing-2EA44F?style=for-the-badge" alt="Tests"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"></a>
+  <a href="https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO"><img src="https://img.shields.io/badge/Stellar-Testnet_Live-7C3AED?style=for-the-badge&logo=stellar&logoColor=white" alt="Stellar Testnet"></a>
+  <a href="https://omni-cold.vercel.app"><img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel"></a>
+  <a href="./contracts/omnicold/src/lib.rs"><img src="https://img.shields.io/badge/Rust-Soroban_SDK_22-E57324?style=for-the-badge&logo=rust&logoColor=white" alt="Rust"></a>
+  <a href="https://omni-cold.vercel.app"><img src="https://img.shields.io/badge/Next.js-16-111111?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"></a>
+</p>
+<p align="center">
+  <a href="./contracts/omnicold/src/test.rs"><img src="https://img.shields.io/badge/Contract_Tests-12_passing-2EA44F?style=for-the-badge" alt="Contract Tests"></a>
+  <a href="./frontend/package.json"><img src="https://img.shields.io/badge/Frontend_Tests-10_passing-2EA44F?style=for-the-badge" alt="Frontend Tests"></a>
+  <a href="./.github/workflows/ci.yml"><img src="https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="CI/CD"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-0969DA?style=for-the-badge" alt="License"></a>
+</p>
+<p align="center">
+  <a href="https://www.freighter.app/"><img src="https://img.shields.io/badge/Wallet-Freighter-00D4FF?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZD0iTTEyIDJMMyAyMGgxOEwxMiAyeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" alt="Freighter"></a>
+  <a href="#currency-support"><img src="https://img.shields.io/badge/Currency-USDC_%7C_XLM_%7C_PHP-7C3AED?style=flat-square" alt="Currencies"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/Theme-Arctic_Dark-0F1923?style=flat-square" alt="Theme"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/Accessible-WCAG_2.1_AA-blue?style=flat-square" alt="WCAG"></a>
 </p>
 
 ---
