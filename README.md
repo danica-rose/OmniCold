@@ -12,31 +12,31 @@
 
 ## Table of Contents
 
-- [Live Deployment](#live-deployment)
-- [Wallet Integration](#wallet-integration)
+- [🚀 Live Deployment](#live-deployment)
+- [👛 Wallet Integration](#wallet-integration)
 - [Problem](#problem)
 - [Solution](#solution)
-- [Architecture](#architecture)
+- [🏗️ Architecture](#architecture)
 - [Contract Entry Points](#contract-entry-points)
 - [Shipment Lifecycle](#shipment-lifecycle)
 - [Currency Support](#currency-support)
-- [Project Structure](#project-structure)
+- [📁 Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Deployed Contract](#deployed-contract)
-- [Testing](#testing)
+- [✨ Features](#features)
+- [📸 Screenshots](#screenshots)
+- [🌐 Deployed Contract](#deployed-contract)
+- [🧪 Testing](#testing)
 - [Level 1 Compliance](#level-1-compliance)
 - [Level 2 Compliance](#level-2-compliance)
 - [Level 3 Compliance](#level-3-compliance)
-- [Idea Submission](#idea-submission)
-- [Submission Checklist](#submission-checklist)
+- [💡 Idea Submission](#idea-submission)
+- [📝 Submission Checklist](#submission-checklist)
 - [License](#license)
 
 ---
 
-## Live Deployment
+## 🚀 Live Deployment
 
 | | |
 |---|---|
@@ -48,7 +48,7 @@
 
 ---
 
-## Wallet Integration
+## 👛 Wallet Integration
 
 > Full details: [WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)
 
@@ -101,7 +101,7 @@ Cold-chain logistics for pharmaceuticals face critical accountability gaps:
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 | Component | Technology |
 |-----------|-----------|
@@ -149,7 +149,7 @@ Live rates from CoinGecko API with 60s cache.
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 omnicold/
@@ -215,7 +215,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ---
 
-## Features
+## ✨ Features
 
 - Arctic dark theme with frosted-glass effects
 - Role-based dashboard (Shipper, Provider, Oracle)
@@ -232,7 +232,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
 ### 1. Landing Page
 
@@ -298,7 +298,7 @@ Open [http://localhost:3000](http://localhost:3000) and connect your Freighter w
 
 ---
 
-## Deployed Contract
+## 🌐 Deployed Contract
 
 - **OmniCold Soroban contract (Stellar Testnet):**
 
@@ -314,7 +314,7 @@ Every initialization, bond deposit, temperature report, and delivery confirmatio
 
 ---
 
-## Testing
+## 🧪 Testing
 
 | Type | Count | Framework |
 |------|-------|-----------|
@@ -424,7 +424,7 @@ File: `.github/workflows/ci.yml`
 
 ---
 
-## Idea Submission
+## 💡 Idea Submission
 
 ### 1. Problem Statement
 
@@ -489,7 +489,7 @@ Cold-chain logistics lacks trustless, automated penalty enforcement when tempera
 
 ---
 
-## Submission Checklist
+## 📝 Submission Checklist
 
 | Item | Status |
 |------|--------|
