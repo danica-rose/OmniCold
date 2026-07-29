@@ -7,6 +7,7 @@ IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smar
 ## Table of Contents
 
 - [Live Deployment](#live-deployment)
+- [Wallet Integration](#wallet-integration)
 - [Problem](#problem)
 - [Solution](#solution)
 - [Architecture](#architecture)
@@ -32,6 +33,22 @@ IoT-integrated escrow dApp on Stellar/Soroban for cold-chain logistics. The smar
 - **Network**: Stellar Testnet
 - **Explorer**: [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CCE3VM3WBDDLBTH2ABYBBXN4XVKEMPQZQ5MI7S33TEIJMVDQMUVECRAO)
 - **Deploy TX**: [View on StellarExpert](https://stellar.expert/explorer/testnet/tx/a0c17f7a92c42553615ac4514ebcb1cf764e243bf645bef27c3438a64adcd437)
+
+## Wallet Integration
+
+> Full details: [WALLET_INTEGRATION.md](./WALLET_INTEGRATION.md)
+
+| Feature | Implementation | File |
+|---------|---------------|------|
+| **Wallet Library** | `@stellar/freighter-api` v2.0.0 | `frontend/package.json` |
+| **Connect Wallet** | `freighter.requestAccess()` → stores public key | `frontend/stores/walletStore.ts` |
+| **Disconnect Wallet** | Clears address, balance, connection state | `frontend/stores/walletStore.ts` |
+| **Sign Transaction** | `freighter.signTransaction(xdr, {networkPassphrase})` | `frontend/services/freighter.ts` |
+| **Get Address** | `freighter.requestAccess()` returns G... address | `frontend/services/freighter.ts` |
+| **Detect Wallet** | `freighter.isConnected()` checks extension | `frontend/services/freighter.ts` |
+| **XLM Balance** | Fetched from Horizon `/accounts/{address}` | `frontend/stores/walletStore.ts` |
+| **Connect UI** | WalletButton component in NavHeader | `frontend/components/layout/WalletButton.tsx` |
+| **TX Submission** | Build XDR → Sign → Submit to Soroban RPC | `frontend/stores/contractStore.ts` |
 
 ## Problem
 
